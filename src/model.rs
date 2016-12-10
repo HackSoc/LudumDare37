@@ -16,7 +16,7 @@ pub use self::Mobile::*;
 pub enum Mobile {
     Player,
     Fiend,
-    Arrow,
+    Arrow{dx: i8, dy: i8},
 }
 
 pub struct WorldData {

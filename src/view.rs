@@ -18,7 +18,7 @@ impl WorldData {
         match mob {
             Player => '@',
             Fiend => 'f',
-            Arrow => '/'
+            Arrow{..} => '/'
         }
     }
 
