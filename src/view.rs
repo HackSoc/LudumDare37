@@ -31,8 +31,8 @@ impl WorldData {
 
     pub fn render_mobile(&self, mob: Mobile) -> chtype {
         match mob {
-                Player => '@',
-                Fiend => 'f',
+            Player => '@',
+            Fiend{..} => 'f',
                 Arrow { dx, dy } => {
                     if dx == 0 {
                         '|'
@@ -50,24 +50,24 @@ impl WorldData {
 
     pub fn render_static(&self, row_n: usize, stat: Static) -> chtype {
         let chty = match stat {
-                Wall => '#',
-                Gate => {
-                    if row_n == 0 || row_n == Y - 1 {
-                        '-'
-                    } else {
-                        '|'
-                    }
+            Wall => '#',
+            Gate => {
+                if row_n == 0 || row_n == Y - 1 {
+                    '-'
+                } else {
+                    '|'
                 }
-                Goal => 'Y',
-                Turret => 'O',
-                Obstacle => '=',
+                }
+            Goal{..} => 'Y',
+            Turret{..} => 'O',
+            Obstacle{..} => '=',
             }
             .to_chtype();
 
         // Apply formatting
         match stat {
-            Goal => chty | COLOR_PAIR(GOAL_COLORS),
-            Turret => chty | A_BOLD,
+            Goal{..} => chty | COLOR_PAIR(GOAL_COLORS),
+            Turret{..} => chty | A_BOLD,
             _ => chty,
         }
     }
