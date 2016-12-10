@@ -50,6 +50,19 @@ fn initial_world() -> WorldData {
 
     world_data.mobiles[20][20] = Some(Player);
 
+    // Some example turrets.
+    let turret_info = TurretInfo {
+        form: (),
+        cooldown: 0,
+        max_cooldown: 3,
+        range: 50,
+        health: 100,
+        max_health: 100,
+        arrow_speed: 2,
+    };
+    world_data.statics[Y / 2][X / 2 - 1] = Some(Turret { info: turret_info });
+    world_data.statics[Y / 2][X / 2 + 1] = Some(Turret { info: turret_info });
+
     // Some example enemies.
     world_data.mobiles[Y - 1][1 + (X / 2) - 3] = Some(enemies::kobold());
     world_data.mobiles[Y - 3][3 + (X / 2) - 3] = Some(enemies::kobold());

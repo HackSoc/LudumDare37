@@ -30,7 +30,7 @@ impl Static {
             Wall | Gate => {}
             Obstacle { mut health, max_health } |
             Goal { mut health, max_health } |
-            Turret { mut health, max_health, .. } => {
+            Turret { info: TurretInfo { mut health, max_health, .. } } => {
                 health = min(health + player_info.heal_factor, max_health)
             }
         };
@@ -41,7 +41,9 @@ impl Static {
             Wall | Gate => {}
             Obstacle { mut health, .. } |
             Goal { mut health, .. } |
-            Turret { mut health, .. } => health = health.saturating_sub(fiend_info.damage_factor),
+            Turret { info: TurretInfo { mut health, .. } } => {
+                health = health.saturating_sub(fiend_info.damage_factor)
+            }
         }
     }
 }
@@ -78,7 +80,7 @@ impl GameState {
     }
 
     fn fight_handler(&mut self, world_data: &mut WorldData, i: Input) {
-        let do_fiends = match i {
+        let do_next = match i {
             KeyDown | Character('s') => {
                 world_data.move_player(Dir::S);
                 true
@@ -102,17 +104,26 @@ impl GameState {
             _ => false,
         };
 
-        if do_fiends {
+        if do_next {
             let mut fiends = LinkedList::new();
+            let mut turrets = LinkedList::new();
             for x in 0..X {
                 for y in 0..Y {
                     if let Some(Fiend { info }) = world_data.mobiles[y][x] {
                         fiends.push_back(((x, y), info))
                     }
+                    if let Some(Turret { info }) = world_data.statics[y][x] {
+                        turrets.push_back(((x, y), info))
+                    }
                 }
             }
+
             for fiend in fiends.iter_mut() {
                 world_data.step_fiend(fiend.0, fiend.1)
+            }
+
+            for turret in turrets.iter_mut() {
+                world_data.step_turret(turret.0, turret.1)
             }
         }
     }
@@ -208,6 +219,47 @@ impl WorldData {
         }
         self.mobiles[old_y][old_x] = None;
         self.mobiles[new_y][new_x] = Some(Fiend { info: fiend_info });
+    }
+
+    fn step_turret(&mut self, xy: (usize, usize), turret_info: TurretInfo) {
+        let (x, y) = xy;
+        let mut new_turret_info = turret_info;
+
+        if turret_info.cooldown != 0 {
+            new_turret_info.cooldown -= 1
+        } else {
+            if self.mobiles[y][x].is_some() {
+                return;
+            }
+
+            match self.find_fiend(xy) {
+                Some(fiend_xy) if distance(xy, fiend_xy) <= turret_info.range as f64 => {
+                    let (fiend_x, fiend_y) = fiend_xy;
+                    let dx = fiend_x as f64 - x as f64;
+                    let dy = fiend_y as f64 - y as f64;
+                    let magnitude = (dx * dx + dy * dy).sqrt();
+                    let arrow = Arrow {
+                        dx: (dx / magnitude * turret_info.arrow_speed as f64).trunc() as i8,
+                        dy: (dy / magnitude * turret_info.arrow_speed as f64).trunc() as i8,
+                    };
+                    self.mobiles[y][x] = Some(arrow);
+                    new_turret_info.cooldown = turret_info.max_cooldown;
+                }
+                _ => {}
+            };
+        }
+
+        self.statics[y][x] = Some(Turret { info: new_turret_info });
+    }
+
+    fn find_fiend(&self, my_xy: (usize, usize)) -> Option<(usize, usize)> {
+        fn fiend_predicate(world: &WorldData, (x, y): (usize, usize)) -> bool {
+            match world.mobiles[y][x] {
+                Some(Fiend { .. }) => true,
+                _ => false,
+            }
+        };
+        self.find_nearest(fiend_predicate, my_xy)
     }
 
     fn find_obstacle(&self, my_xy: (usize, usize)) -> Option<(usize, usize)> {

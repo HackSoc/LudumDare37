@@ -7,13 +7,19 @@ pub enum Static {
     Wall,
     Gate,
     Goal { health: u8, max_health: u8 },
-    Turret {
-        form: (),
-        reload_counter: u8,
-        health: u8,
-        max_health: u8,
-    },
+    Turret { info: TurretInfo },
     Obstacle { health: u8, max_health: u8 },
+}
+
+#[derive(Clone, Copy, PartialEq)]
+pub struct TurretInfo {
+    pub form: (),
+    pub cooldown: u8,
+    pub max_cooldown: u8,
+    pub range: u8,
+    pub health: u8,
+    pub max_health: u8,
+    pub arrow_speed: u8,
 }
 
 pub use self::Mobile::*;
