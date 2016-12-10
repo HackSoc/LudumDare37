@@ -17,5 +17,7 @@ pub enum Mobile {
     Arrow,
 }
 
-pub static mut statics: [[Option<Static>; X]; Y] = [[None; X]; Y];
-pub static mut mobiles: [[Option<Mobile>; X]; Y] = [[None; X]; Y];
+pub struct WorldData {
+    pub statics: [[Option<Static>; X]; Y],
+    pub mobiles: [[Option<Mobile>; X]; Y],
+}
