@@ -32,7 +32,7 @@ impl WorldData {
     pub fn render_mobile(&self, mob: Mobile) -> chtype {
         match mob {
                 Player => '@',
-                Fiend { .. } => 'f',
+                Fiend { info } => info.ch,
                 Arrow { dx, dy } => {
                     if dx == 0 {
                         '|'

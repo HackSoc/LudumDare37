@@ -3,6 +3,7 @@ use model::*;
 pub fn kobold() -> Mobile {
     Fiend {
         info: FiendInfo {
+            ch: 'k',
             form: (),
             health: 15,
             damage_factor: 3,

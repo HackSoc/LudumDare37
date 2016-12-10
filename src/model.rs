@@ -45,6 +45,7 @@ pub struct PlayerInfo {
 
 #[derive(Clone, Copy, PartialEq)]
 pub struct FiendInfo {
+    pub ch: char,
     pub form: (),
     pub health: u8,
     pub damage_factor: u8,
