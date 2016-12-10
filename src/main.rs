@@ -40,6 +40,8 @@ fn initial_world() -> WorldData {
 
 fn main() {
     let window = initscr();
+    let _ = noecho();
+    let _ = curs_set(0);
     let world_data = initial_world();
     world_data.render(&window);
     let _ = window.getch();
