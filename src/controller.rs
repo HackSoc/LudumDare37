@@ -105,6 +105,9 @@ impl GameState {
         };
 
         if do_next {
+            // find all fiends, turrets, and arrows (todo: just have
+            // these in a list directly, rather than the current
+            // matrix form?)
             let mut fiends = LinkedList::new();
             let mut turrets = LinkedList::new();
             let mut arrows = LinkedList::new();
@@ -122,6 +125,7 @@ impl GameState {
                 }
             }
 
+            // step everything.
             for fiend in fiends.iter_mut() {
                 world_data.step_fiend(fiend.0, fiend.1)
             }
@@ -132,6 +136,16 @@ impl GameState {
 
             for arrow in arrows.iter_mut() {
                 world_data.step_arrow(arrow.0, arrow.1)
+            }
+
+            // clean up dead mobs.
+            for x in 0..X {
+                for y in 0..Y {
+                    match world_data.mobiles[y][x] {
+                        Some(Fiend { info }) if info.health == 0 => world_data.mobiles[y][x] = None,
+                        _ => {}
+                    }
+                }
             }
         }
     }
