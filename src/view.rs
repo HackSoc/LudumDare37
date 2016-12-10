@@ -6,9 +6,11 @@ impl WorldData {
     pub fn render(&self, window: &Window) {
         for row_n in 0..Y {
             for col_n in 0..X {
-                let ch = self.mobiles[row_n][col_n]
-                    .map_or(self.statics[row_n][col_n]
-                            .map_or(' ', |s| self.render_static(row_n, s)), |m| self.render_mobile(m));
+                let ch = self.mobiles[row_n][col_n].map_or(self.statics[row_n][col_n]
+                                                               .map_or(' ', |s| {
+                                                                   self.render_static(row_n, s)
+                                                               }),
+                                                           |m| self.render_mobile(m));
                 window.mvaddch(row_n as i32, col_n as i32, ch);
             }
         }
@@ -18,14 +20,30 @@ impl WorldData {
         match mob {
             Player => '@',
             Fiend => 'f',
-            Arrow{..} => '/'
+            Arrow { dx, dy } => {
+                if dx == 0 {
+                    '|'
+                } else if dy == 0 {
+                    '-'
+                } else if (dx < 0 && dy < 0) || (dy > 0 && dx > 0) {
+                    '\\'
+                } else {
+                    '/'
+                }
+            }
         }
     }
 
     pub fn render_static(&self, row_n: usize, stat: Static) -> char {
         match stat {
             Wall => '#',
-            Gate => if row_n == 0 || row_n == Y-1 { '-' } else { '|' },
+            Gate => {
+                if row_n == 0 || row_n == Y - 1 {
+                    '-'
+                } else {
+                    '|'
+                }
+            }
             Goal => 'Y',
             Turret => 'O',
             Obstacle => '=',
