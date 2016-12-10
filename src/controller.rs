@@ -241,7 +241,7 @@ impl WorldData {
         for x in 0..X {
             for y in 0..Y {
                 if !predicate(self, (x, y)) {
-                    break;
+                    continue;
                 }
 
                 match found_xy {
