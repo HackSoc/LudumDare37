@@ -33,7 +33,7 @@ impl WorldData {
         match mob {
                 Player => '@',
                 Fiend { info } => info.ch,
-                Arrow { dx, dy } => {
+                Arrow { info: ArrowInfo { dx, dy, .. } } => {
                     if dx == 0 {
                         '|'
                     } else if dy == 0 {

@@ -27,7 +27,7 @@ pub use self::Mobile::*;
 pub enum Mobile {
     Player,
     Fiend { info: FiendInfo },
-    Arrow { dx: i8, dy: i8 },
+    Arrow { info: ArrowInfo },
 }
 
 impl Mobile {
@@ -60,6 +60,13 @@ pub struct FiendInfo {
     pub goal_target_distance: u8,
     pub turret_target_distance: u8,
     pub obstacle_target_distance: u8,
+}
+
+#[derive(Clone, Copy, PartialEq)]
+pub struct ArrowInfo {
+    pub dx: i8,
+    pub dy: i8,
+    pub damage_factor: u8,
 }
 
 pub struct WorldData {

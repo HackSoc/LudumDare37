@@ -107,6 +107,7 @@ impl GameState {
         if do_next {
             let mut fiends = LinkedList::new();
             let mut turrets = LinkedList::new();
+            let mut arrows = LinkedList::new();
             for x in 0..X {
                 for y in 0..Y {
                     if let Some(Fiend { info }) = world_data.mobiles[y][x] {
@@ -114,6 +115,9 @@ impl GameState {
                     }
                     if let Some(Turret { info }) = world_data.statics[y][x] {
                         turrets.push_back(((x, y), info))
+                    }
+                    if let Some(Arrow { info }) = world_data.mobiles[y][x] {
+                        arrows.push_back(((x, y), info))
                     }
                 }
             }
@@ -124,6 +128,10 @@ impl GameState {
 
             for turret in turrets.iter_mut() {
                 world_data.step_turret(turret.0, turret.1)
+            }
+
+            for arrow in arrows.iter_mut() {
+                world_data.step_arrow(arrow.0, arrow.1)
             }
         }
     }
@@ -239,8 +247,11 @@ impl WorldData {
                     let dy = fiend_y as f64 - y as f64;
                     let magnitude = (dx * dx + dy * dy).sqrt();
                     let arrow = Arrow {
-                        dx: (dx / magnitude * turret_info.arrow_speed as f64).trunc() as i8,
-                        dy: (dy / magnitude * turret_info.arrow_speed as f64).trunc() as i8,
+                        info: ArrowInfo {
+                            dx: (dx / magnitude * turret_info.arrow_speed as f64).trunc() as i8,
+                            dy: (dy / magnitude * turret_info.arrow_speed as f64).trunc() as i8,
+                            damage_factor: 3,
+                        },
                     };
                     self.mobiles[y][x] = Some(arrow);
                     new_turret_info.cooldown = turret_info.max_cooldown;
@@ -250,6 +261,55 @@ impl WorldData {
         }
 
         self.statics[y][x] = Some(Turret { info: new_turret_info });
+    }
+
+    fn step_arrow(&mut self, (old_x, old_y): (usize, usize), arrow_info: ArrowInfo) {
+        // returns 'true' if movement should continue ('false' if the
+        // arrow hits something and gets destroyed)
+        fn go(world: &WorldData, arrow_info: ArrowInfo, (x, y): (usize, usize)) -> bool {
+            if world.statics[y][x].is_some() || world.mobiles[y][x].is_some() {
+                match world.mobiles[y][x] {
+                    Some(Fiend { mut info }) => {
+                        info.health = info.health.saturating_sub(arrow_info.damage_factor)
+                    }
+                    _ => {}
+                }
+                return false;
+            }
+            return true;
+        }
+
+        let arrow = self.mobiles[old_y][old_x];
+        self.mobiles[old_y][old_x] = None;
+
+        let mut x = old_x;
+        let mut y = old_y;
+
+        // Move the arrow one space at a time, terminating if it hits something.
+        if arrow_info.dx == 0 {
+            for d in 0..arrow_info.dy.abs() {
+                y = if arrow_info.dy > 0 { y + 1 } else { y - 1 };
+                if !go(self, arrow_info, (old_x, y)) {
+                    return;
+                }
+            }
+        } else {
+            // Bresenham's line algorithm (integer arithmetic variant, assumes dx /= 0)
+            let mut err = 2 * arrow_info.dy - arrow_info.dx;
+            for _ in 0..arrow_info.dx.abs() {
+                x = if arrow_info.dx > 0 { x + 1 } else { x - 1 };
+                if err > 0 {
+                    y += 1;
+                    err -= arrow_info.dx;
+                }
+                err += arrow_info.dy;
+                if !go(self, arrow_info, (x, y)) {
+                    return;
+                }
+            }
+        }
+
+        self.mobiles[y][x] = arrow;
     }
 
     fn find_fiend(&self, my_xy: (usize, usize)) -> Option<(usize, usize)> {
