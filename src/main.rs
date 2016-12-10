@@ -3,6 +3,7 @@ extern crate pancurses;
 mod controller;
 mod model;
 mod view;
+mod enemies;
 
 use model::*;
 
@@ -48,6 +49,11 @@ fn initial_world() -> WorldData {
     }
 
     world_data.mobiles[20][20] = Some(Player);
+
+    // Some example enemies.
+    world_data.mobiles[Y - 1][1 + (X / 2) - 3] = Some(enemies::kobold());
+    world_data.mobiles[Y - 3][3 + (X / 2) - 3] = Some(enemies::kobold());
+    world_data.mobiles[Y - 1][5 + (X / 2) - 3] = Some(enemies::kobold());
 
     return world_data;
 }
