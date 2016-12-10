@@ -2,15 +2,27 @@ extern crate pancurses;
 
 use pancurses::*;
 
-const X: usize = 64;
-const Y: usize = 32;
+const X: usize = 63;
+const Y: usize = 31;
 
 #[derive(Clone, Copy)]
-struct room_cell{
-
+enum Static {
+    Wall,
+    Gate,
+    Goal,
+    Turret,
+    Obstacle
 }
 
-static mut room: [[room_cell; X]; Y] = [[room_cell{}; X]; Y];
+#[derive(Clone, Copy)]
+enum Mobile {
+    Player,
+    Fiend,
+    Arrow
+}
+
+static mut statics: [[Option<Static>; X]; Y] = [[None; X]; Y];
+static mut mobiles: [[Option<Mobile>; X]; Y] = [[None; X]; Y];
 
 fn main() {
     let window = initscr();
