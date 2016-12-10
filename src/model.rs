@@ -2,7 +2,7 @@ pub const X: usize = 63;
 pub const Y: usize = 31;
 
 pub use self::Static::*;
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, PartialEq)]
 pub enum Static {
     Wall,
     Gate,
@@ -12,7 +12,7 @@ pub enum Static {
 }
 
 pub use self::Mobile::*;
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, PartialEq)]
 pub enum Mobile {
     Player,
     Fiend,
