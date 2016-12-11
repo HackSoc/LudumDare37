@@ -3,9 +3,6 @@ mod fiend;
 mod turret;
 
 use model::*;
-use controller::arrow::*;
-use controller::fiend::*;
-use controller::turret::*;
 
 use pancurses::Input;
 use pancurses::Input::*;
