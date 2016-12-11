@@ -2,7 +2,7 @@ pub const X: usize = 63;
 pub const Y: usize = 31;
 
 pub use self::Static::*;
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Static {
     Wall,
     Gate,
@@ -11,7 +11,7 @@ pub enum Static {
     Obstacle { health: u8, max_health: u8 },
 }
 
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub struct TurretInfo {
     pub form: (),
     pub cooldown: u8,
@@ -23,7 +23,7 @@ pub struct TurretInfo {
 }
 
 pub use self::Mobile::*;
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Mobile {
     Player,
     Fiend { info: FiendInfo },
@@ -49,7 +49,7 @@ pub struct PlayerInfo {
     pub armour_factor: u8,
 }
 
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub struct FiendInfo {
     pub ch: char,
     pub form: (),
@@ -63,7 +63,7 @@ pub struct FiendInfo {
     pub obstacle_target_distance: u8,
 }
 
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub struct ArrowInfo {
     pub dx: i8,
     pub dy: i8,
