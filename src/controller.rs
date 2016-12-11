@@ -272,6 +272,10 @@ impl WorldData {
         let (x, y) = xy;
         let mut new_turret_info = turret_info;
 
+        if turret_info.health == 0 {
+            return;
+        }
+
         if turret_info.cooldown != 0 {
             new_turret_info.cooldown -= 1
         } else {
