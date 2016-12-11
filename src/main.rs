@@ -29,6 +29,9 @@ fn initial_world() -> WorldData {
             heal_factor: 1,
             armour_factor: 1,
         },
+        menu: Menu::Root,
+        menu_index: 0,
+        placement: None
     };
     // add walls!
     for x in 0..X {
@@ -91,9 +94,9 @@ fn main() {
     let mut world_data = initial_world();
     let game_windows = view::setup_render(&window);
     let _ = window.keypad(true);
-    let mut gamestate = model::Fight;
+    let mut gamestate = model::Construct;
     while gamestate != model::End {
-        world_data.render(&game_windows);
+        world_data.render(&game_windows, &gamestate);
         if let Some(i) = window.getch() {
             gamestate.handle(&mut world_data, i)
         }

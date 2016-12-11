@@ -35,11 +35,121 @@ impl Static {
 impl GameState {
     pub fn handle(&mut self, world_data: &mut WorldData, i: Input) {
         match *self {
-            Startup => *self = Build,
-            Build => unimplemented!(),
+            Startup => *self = Construct,
+            Construct => self.construct_handler(world_data, i),
             Fight => self.fight_handler(world_data, i),
             GameOver => unimplemented!(),
             End => panic!("Should have ended and didn't!"),
+        };
+    }
+
+    fn construct_handler(&mut self, world_data: &mut WorldData, i: Input) {
+        match world_data.menu {
+            Menu::Place => match i {
+                KeyDown | Character('s') => {
+                    world_data.player_info.location.1 += 1;
+                    if world_data.player_info.location.1 == Y - 1 {
+                        world_data.player_info.location.1 = Y - 2;
+                    };
+                }
+                KeyUp | Character('w') => {
+                    world_data.player_info.location.1 -= 1;
+                    if world_data.player_info.location.1 == 0 {
+                        world_data.player_info.location.1 = 1;
+                    };
+                }
+                KeyLeft | Character('a') => {
+                    world_data.player_info.location.0 -= 1;
+                    if world_data.player_info.location.0 == 0 {
+                        world_data.player_info.location.0 = 1;
+                    };
+                }
+                KeyRight | Character('d') => {
+                    world_data.player_info.location.0 += 1;
+                    if world_data.player_info.location.0 == X - 1 {
+                        world_data.player_info.location.0= X - 2;
+                    };
+                }
+                Character(' ') | Character('\n') => {
+                    if world_data.statics[world_data.player_info.location.1][world_data.player_info.location.0].is_some() {
+                        return;
+                    }
+                    world_data.statics[world_data.player_info.location.1][world_data.player_info.location.0] = world_data.placement;
+                    match world_data.placement {
+                        Some(Turret{..}) => world_data.turrets.insert(world_data.player_info.location),
+                        Some(Obstacle{..}) => world_data.obstacles.insert(world_data.player_info.location),
+                        _ => panic!("Lost placement???")
+                    };
+                    world_data.placement = None;
+                    world_data.menu = Menu::Root;
+                }
+                _ => {}
+            },
+            Menu::Move2 => {}
+            _ => match i {
+                KeyDown | Character('s') => {
+                    world_data.menu_index += 1;
+                    world_data.menu_index %= world_data.current_menu_length();
+                }
+                KeyUp | Character('w') => {
+                    world_data.menu_index =
+                        world_data.menu_index.checked_sub(1).unwrap_or(world_data.current_menu_length() - 1);
+                }
+            
+                Character('q') => *self = End,
+                KeyBackspace => {
+                    world_data.menu = Menu::Root;
+                    world_data.menu_index = 0;
+                }
+                Character(' ') | Character('\n') => match (world_data.menu, world_data.menu_index) {
+                    (Menu::Root, 0) => {
+                        world_data.menu = Menu::Build;
+                        world_data.menu_index = 0;
+                    }
+                    (Menu::Root, 1) => {
+                        world_data.menu = Menu::Move;
+                        world_data.menu_index = 0;
+                    }
+                    (Menu::Root, 2) => {
+                        world_data.menu = Menu::Upgrade;
+                        world_data.menu_index = 0;
+                    }
+                    (Menu::Root, 3) => {
+                        world_data.menu_index = 0;
+                        *self = Fight;
+                        world_data.player_info.location = (20, 20);
+                    }
+                    (Menu::Build, 0) => {
+                        world_data.menu = Menu::Place;
+                        world_data.menu_index = 0;
+                        world_data.placement = Some(Turret{
+                            info: TurretInfo {
+                                form: (),
+                                cooldown: 0,
+                                max_cooldown: 3,
+                                range: 50,
+                                health: 100,
+                                max_health: 100,
+                                arrow_speed: 2
+                            }
+                        });
+                    }
+                    (Menu::Build, 1) => {
+                        world_data.menu = Menu::Place;
+                        world_data.menu_index = 0;
+                        world_data.placement = Some(Obstacle{
+                            health: 300, max_health: 300
+                        });
+                    }
+                    (Menu::Build, 2) => {
+                        world_data.menu = Menu::Root;
+                        world_data.menu_index = 0
+                    }
+                    
+                    _ => unimplemented!()
+                },
+                _ => ()
+            }
         };
     }
 
@@ -143,6 +253,18 @@ impl GameState {
 }
 
 impl WorldData {
+    fn current_menu_length(&self) -> usize {
+        match self.menu {
+            Menu::Root => 4,
+            Menu::Build => 3,
+            Menu::Move => 1 + self.turrets.len() + self.obstacles.len(),
+            Menu::Upgrade => 1 + self.turrets.len(),
+            Menu::Continue => 0,
+            Menu::Place => 0,
+            Menu::Move2 => 0
+        }
+    }
+    
     fn move_player(&mut self, dir: Dir) {
         let old_x = self.player_info.location.0;
         let old_y = self.player_info.location.1;

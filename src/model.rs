@@ -74,6 +74,31 @@ pub struct ArrowInfo {
     pub damage_factor: usize,
 }
 
+#[derive(Clone, Copy)]
+pub enum Menu {
+    Root,
+    Build,
+    Move,
+    Upgrade,
+    Continue,
+    Place,
+    Move2
+}
+
+/*
+pub enum RootItem {
+    Build,
+    Move,
+    Upgrade,
+    Continue
+}
+
+pub enum BuildItem {
+    Turret,
+    Obstacle
+}
+*/
+
 pub struct WorldData {
     pub statics: [[Option<Static>; X]; Y],
     pub mobiles: [[Option<Mobile>; X]; Y],
@@ -82,15 +107,19 @@ pub struct WorldData {
     pub turrets: BTreeSet<(usize, usize)>,
     pub arrows: BTreeSet<(usize, usize)>,
     pub obstacles: BTreeSet<(usize, usize)>,
+    pub menu: Menu,
+    pub menu_index: usize,
+    pub placement: Option<Static>
 }
 
+pub use self::GameState::*;
 #[derive(PartialEq, Eq)]
 pub enum GameState {
     Startup,
-    Build,
+    Construct,
     Fight,
     GameOver,
     End,
 }
 
-pub use self::GameState::*;
+

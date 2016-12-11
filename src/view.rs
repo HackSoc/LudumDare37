@@ -7,6 +7,7 @@ const DEFAULT_COLORS: color_pair = 0;
 const GOAL_COLORS: color_pair = 1;
 const BROKEN_TURRET_COLORS: color_pair = 2;
 const DAMAGED_TURRET_COLORS: color_pair = 3;
+const PLACEMENT_COLORS: color_pair = 4;
 
 const EMPTY_CELL: chtype = ' ' as u32;
 
@@ -17,6 +18,15 @@ pub struct GameWindows {
     log: Window,
 }
 
+impl GameWindows{
+    fn refresh(&self) {
+        self.stats.refresh();
+        self.view.refresh();
+        self.help.refresh();
+        self.log.refresh();
+    }
+}
+
 pub fn setup_render(window: &Window) -> GameWindows {
     start_color();
     use_default_colors();
@@ -24,6 +34,7 @@ pub fn setup_render(window: &Window) -> GameWindows {
     init_pair(GOAL_COLORS as i16, COLOR_YELLOW, -1);
     init_pair(BROKEN_TURRET_COLORS as i16, COLOR_RED, -1);
     init_pair(DAMAGED_TURRET_COLORS as i16, COLOR_MAGENTA, -1);
+    init_pair(PLACEMENT_COLORS as i16, COLOR_BLUE, -1);
 
     let stats = window.subwin(5, X as i32, 0, 0).unwrap();
     stats.keypad(true);
@@ -46,7 +57,59 @@ pub fn setup_render(window: &Window) -> GameWindows {
 
 impl WorldData {
     #[cfg_attr(rustfmt, rustfmt_skip)]
-    pub fn render(&self, windows: &GameWindows) {
+    pub fn render(&self, windows: &GameWindows, game_state: &GameState) {
+        match *game_state {
+            Construct => self.render_construct(windows),
+            Fight => self.render_fight(windows),
+            _ => unimplemented!()
+        };
+    }
+
+    pub fn render_construct(&self, windows: &GameWindows) {
+        windows.help.erase();
+        windows.help.draw_box(0,0);
+        windows.help.mvaddstr(1,1,"THING PROTECTOR");
+        for row_n in 0..Y {
+            for col_n in 0..X {
+                let ch = self.statics[row_n][col_n].map_or(
+                    EMPTY_CELL, |s| {
+                        self.render_static(row_n, s)
+                    });
+                windows.view.mvaddch(row_n as i32, col_n as i32, ch);
+            }
+        }
+        
+        match self.menu {
+            Menu::Root => {
+                windows.help.mvaddstr(3, 3, "Build");
+                windows.help.mvaddstr(4, 3, "Move");
+                windows.help.mvaddstr(5, 3, "Upgrade");
+                windows.help.mvaddstr(6, 3, "Continue");
+                windows.help.mvaddch(self.menu_index as i32 + 3, 2, '>');
+                windows.help.mvaddch(self.menu_index as i32 + 3, 13, '<');
+            }
+            Menu::Build => {
+                windows.help.mvaddstr(3, 3, "Turret");
+                windows.help.mvaddstr(4, 3, "Obstacle");
+                windows.help.mvaddstr(5, 3, "Back");
+                windows.help.mvaddch(self.menu_index as i32 + 3, 2, '>');
+                windows.help.mvaddch(self.menu_index as i32 + 3, 13, '<');
+            }
+
+
+            Menu::Place => {
+                let placement = self.placement.expect("Want to place but nothing to place!");
+                windows.help.mvaddstr(3, 3, "Placing a");
+                windows.help.mvaddstr(4, 3, match placement {Turret{..} => "Turret", Obstacle{..} => "Obstacle", _ => "Error"});
+                windows.view.mvaddch(self.player_info.location.1 as i32, self.player_info.location.0 as i32, self.render_static(1,placement));
+                
+            }
+            _ => unimplemented!()
+        }
+        windows.refresh();
+    }
+    
+    pub fn render_fight(&self, windows: &GameWindows) {
         for row_n in 0..Y {
             for col_n in 0..X {
                 let ch = self.mobiles[row_n][col_n].map_or(
