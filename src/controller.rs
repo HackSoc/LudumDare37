@@ -62,16 +62,6 @@ impl Static {
 }
 
 impl Mobile {
-    fn player_interact(&mut self, player_info: &PlayerInfo) {
-        match *self {
-            Arrow { .. } => {}
-            Fiend { mut info } => {
-                info.health = info.health.saturating_sub(player_info.damage_factor)
-            }
-            Player => panic!("Player walked into themself"),
-        };
-    }
-
     fn fiend_interact(&mut self, fiend_info: &FiendInfo, player_info: &mut PlayerInfo) {
         match *self {
             Arrow { .. } => {}
@@ -182,15 +172,18 @@ impl WorldData {
         match self.statics[new_y][new_x] {
             Some(mut sta) => {
                 sta.player_interact(&self.player_info);
+                self.statics[new_y][new_x] = Some(sta);
                 return;
             }
             None => {} // we can move into an empty space
         };
         match self.mobiles[new_y][new_x] {
-            Some(mut mob) => {
-                mob.player_interact(&self.player_info);
-                return;
+            Some(Arrow { .. }) => return,
+            Some(Fiend { mut info }) => {
+                info.health = info.health.saturating_sub(self.player_info.damage_factor);
+                self.mobiles[new_y][new_x] = Some(Fiend{info:info});
             }
+            Some(Player) => panic!("Player walked into themself"),
             None => {} // we can move into an empty space
         }
         self.player_info.location = (new_x, new_y);
