@@ -8,6 +8,7 @@ const GOAL_COLORS: color_pair = 1;
 const BROKEN_TURRET_COLORS: color_pair = 2;
 const DAMAGED_TURRET_COLORS: color_pair = 3;
 const PLACEMENT_COLORS: color_pair = 4;
+const GAMEOVER_COLORS: color_pair = 5;
 
 const EMPTY_CELL: chtype = ' ' as u32;
 
@@ -35,6 +36,7 @@ pub fn setup_render(window: &Window) -> GameWindows {
     init_pair(BROKEN_TURRET_COLORS as i16, COLOR_RED, -1);
     init_pair(DAMAGED_TURRET_COLORS as i16, COLOR_MAGENTA, -1);
     init_pair(PLACEMENT_COLORS as i16, COLOR_BLUE, -1);
+    init_pair(GAMEOVER_COLORS as i16, COLOR_RED, -1);
 
     let stats = window.subwin(5, X as i32, 0, 0).unwrap();
     stats.keypad(true);
@@ -56,12 +58,12 @@ pub fn setup_render(window: &Window) -> GameWindows {
 }
 
 impl WorldData {
-    #[cfg_attr(rustfmt, rustfmt_skip)]
     pub fn render(&self, windows: &GameWindows, game_state: &GameState) {
         match *game_state {
             Construct => self.render_construct(windows),
             Fight { .. } => self.render_fight(windows),
-            _ => unimplemented!()
+            GameOver { ref msg } => self.render_gameover(windows, msg),
+            _ => unimplemented!(),
         };
     }
 
@@ -147,7 +149,26 @@ impl WorldData {
         for i in 0..self.log.len() {
             windows.log.mvaddstr(i as i32 + 1, 1, self.log[i].as_str());
         }
+
+        windows.stats.refresh();
+        windows.view.refresh();
+        windows.help.refresh();
         windows.log.refresh();
+    }
+
+    pub fn render_gameover(&self, windows: &GameWindows, msg: &String) {
+        let x = (X - msg.len() - 2) as i32 / 2;
+        let y = (Y - 3) as i32 / 2 + 5;
+        let gameover = windows.view.subwin(3, msg.len() as i32 + 2, y, x).unwrap();
+
+        gameover.attron(COLOR_PAIR(GAMEOVER_COLORS));
+        gameover.draw_box(0, 0);
+        gameover.attron(A_BOLD);
+        gameover.mvaddstr(1, 1, msg.as_str());
+        gameover.attroff(A_BOLD | COLOR_PAIR(GAMEOVER_COLORS));
+
+        gameover.refresh();
+        windows.view.refresh();
     }
 
     pub fn render_mobile(&self, mob: Mobile) -> chtype {
