@@ -122,6 +122,7 @@ pub fn make_fiend(points: usize) -> Option<FiendInfo> {
         goal_target_distance: goal_target_distance,
         turret_target_distance: turret_target_distance,
         obstacle_target_distance: obstacle_target_distance,
+        value: points,
     })
 }
 

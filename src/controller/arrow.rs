@@ -96,6 +96,7 @@ impl WorldData {
             self.log_msg(format!("{} is shot for {} damage! (dead!)",
                                  info.name,
                                  damage_factor));
+            self.cash += info.value;
         } else {
             self.log_msg(format!("{} is shot for {} damage! ({} / {})",
                                  info.name,

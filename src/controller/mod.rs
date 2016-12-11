@@ -347,6 +347,7 @@ impl WorldData {
     fn attack(&mut self, info: FiendInfo, damage_factor: usize) {
         if info.health == 0 {
             self.log_msg(format!("{} is hit for {} damage! (dead!)", info.name, damage_factor));
+            self.cash += info.value;
         } else {
             self.log_msg(format!("{} is hit for {} damage! ({} / {})",
                                  info.name,

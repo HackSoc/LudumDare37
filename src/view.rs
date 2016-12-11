@@ -127,16 +127,18 @@ impl WorldData {
                 windows.view.mvaddch(row_n as i32, col_n as i32, ch);
             }
         }
-        let stat_string = format!("Health: {:3} | Thing Integrity: {:3} | Wave: {:3}",
-                                  self.player_info.health,
-                                  match self.statics[Y / 2][X / 2] {
-                                      Some(Goal { health: h, .. }) => h,
-                                      _ => 0,
-                                  },
-                                  1);
+        let stat_string1 = format!("Health: {:3} | Thing Integrity: {:3} | Wave: {:3}",
+                                   self.player_info.health,
+                                   match self.statics[Y / 2][X / 2] {
+                                       Some(Goal { health: h, .. }) => h,
+                                       _ => 0,
+                                   },
+                                   1);
+        let stat_string2 = format!("Cash: {:5}", self.cash);
 
-        let offset = (X - stat_string.len()) as i32 / 2;
-        windows.stats.mvaddstr(2, offset, stat_string.as_str());
+        let offset = (X - stat_string1.len()) as i32 / 2;
+        windows.stats.mvaddstr(2, offset, stat_string1.as_str());
+        windows.stats.mvaddstr(3, offset, stat_string2.as_str());
         windows.stats.refresh();
 
         windows.view.refresh();

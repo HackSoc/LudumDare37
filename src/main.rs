@@ -38,6 +38,7 @@ fn initial_world() -> WorldData {
         placement: None,
         goal_location: (X / 2, Y / 2),
         log: ["".to_string(), "".to_string(), "".to_string(), "".to_string(), "".to_string()],
+        cash: 0,
     };
     // add walls!
     for x in 0..X {

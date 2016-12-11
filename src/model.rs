@@ -82,6 +82,7 @@ pub struct FiendInfo {
     pub goal_target_distance: usize,
     pub turret_target_distance: usize,
     pub obstacle_target_distance: usize,
+    pub value: usize,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -131,6 +132,7 @@ pub struct WorldData {
     pub menu_index: usize,
     pub placement: Option<Static>,
     pub log: [String; 5],
+    pub cash: usize,
 }
 
 impl WorldData {
