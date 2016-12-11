@@ -50,7 +50,8 @@ pub fn adjacency((x, y): (usize, usize)) -> Vec<(usize, usize)> {
             _ => x,
         };
         for j in 0..3 {
-            if (j == 0 && y == 0) || (j == 2 && y == Y - 1) || (i == 1 && j == 1) {
+            if (j == 0 && y == 0) || (j == 2 && y == Y - 1) || (i == 1 && j == 1) ||
+               (i != 1 && j != 1) {
                 continue;
             }
             let cy = match j {
