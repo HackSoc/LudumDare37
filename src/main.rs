@@ -14,8 +14,6 @@ use model::*;
 
 use pancurses::*;
 
-use fiends::make_wave;
-
 fn initial_world() -> WorldData {
     let mut world_data = WorldData {
         statics: [[None; X]; Y],
@@ -39,6 +37,7 @@ fn initial_world() -> WorldData {
         goal_location: (X / 2, Y / 2),
         log: ["".to_string(), "".to_string(), "".to_string(), "".to_string(), "".to_string()],
         cash: 0,
+        wave: 0,
     };
     // add walls!
     for x in 0..X {

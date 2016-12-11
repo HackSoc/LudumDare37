@@ -3,6 +3,7 @@ mod fiend;
 mod turret;
 
 use model::*;
+use fiends::make_wave;
 
 use pancurses::Input;
 use pancurses::Input::*;
@@ -130,7 +131,8 @@ impl GameState {
                             }
                             (Menu::Root, 3) => {
                                 world_data.menu_index = 0;
-                                *self = Fight { to_spawn: Vec::new() };
+                                world_data.wave += 1;
+                                *self = Fight { to_spawn: make_wave(world_data.wave) };
                                 world_data.player_info.location = (20, 20);
                             }
                             (Menu::Build, 0) => {

@@ -133,6 +133,7 @@ pub struct WorldData {
     pub placement: Option<Static>,
     pub log: [String; 5],
     pub cash: usize,
+    pub wave: usize,
 }
 
 impl WorldData {
