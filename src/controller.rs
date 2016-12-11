@@ -297,69 +297,76 @@ impl WorldData {
     }
 
     fn step_arrow(&mut self, (old_x, old_y): (usize, usize), arrow_info: ArrowInfo) {
-        // returns 'true' if movement should continue ('false' if the
-        // arrow hits something and gets destroyed)
-        fn go(world: &mut WorldData, arrow_info: ArrowInfo, (x, y): (usize, usize)) -> bool {
-            match (world.statics[y][x], world.mobiles[y][x]) {
-                (Some(Wall), _) => false,
-                (Some(Gate), _) => false,
-                (_, Some(Fiend { mut info })) => {
-                    info.health = info.health.saturating_sub(arrow_info.damage_factor);
-                    world.mobiles[y][x] = Some(Fiend{info:info});
-                    false
-                }
-                (_, Some(_)) => false,
-                _ => true,
-            }
-        }
-
         let arrow = self.mobiles[old_y][old_x];
-        self.mobiles[old_y][old_x] = None;
 
         let mut x = old_x;
         let mut y = old_y;
-        if arrow_info.dx == 0 {
-            for _ in 0..arrow_info.dy {
-                y = if arrow_info.incy { y + 1 } else { y - 1 };
-                if !go(self, arrow_info, (x, y)) {
-                    return;
+
+        self.mobiles[y][x] = None;
+
+        // Would be nice to avoid this extra scope...
+        {
+            // returns 'true' if movement should continue ('false' if
+            // the arrow hits something and gets destroyed)
+            //
+            // I am not sure why this needs to be mut.
+            let mut go = |(x, y): (usize, usize)| {
+                match (self.statics[y][x], self.mobiles[y][x]) {
+                    (Some(Wall), _) => false,
+                    (Some(Gate), _) => false,
+                    (_, Some(Fiend { mut info })) => {
+                        info.health = info.health.saturating_sub(arrow_info.damage_factor);
+                        self.mobiles[y][x] = Some(Fiend{info:info});
+                        false
+                    }
+                    (_, Some(_)) => false,
+                    _ => true,
                 }
-            }
-        } else if arrow_info.dy == 0 {
-            for _ in 0..arrow_info.dx {
-                x = if arrow_info.incx { x + 1 } else { x - 1 };
-                if !go(self, arrow_info, (x, y)) {
-                    return;
-                }
-            }
-        } else {
-            // Bresenham's line algorithm
-            let (counter, mut err, err_inc, err_dec, inc, correction): (u8, i32, i32, i32, (i8, i8), (i8, i8)) = if arrow_info.dx > arrow_info.dy {
-                (arrow_info.dx,
-                 arrow_info.dy as i32 * 2 - arrow_info.dx as i32,
-                 arrow_info.dy as i32 * 2,
-                 arrow_info.dx as i32 * 2,
-                 if arrow_info.incx { (1, 0) } else { (-1, 0) },
-                 if arrow_info.incy { (0, 1) } else { (0, -1) })
-            } else {
-                (arrow_info.dy,
-                 arrow_info.dx as i32 * 2 - arrow_info.dy as i32,
-                 arrow_info.dx as i32 * 2,
-                 arrow_info.dy as i32 * 2,
-                 if arrow_info.incy { (0, 1) } else { (0, -1) },
-                 if arrow_info.incx { (1, 0) } else { (-1, 0) })
             };
-            for _ in 0..counter {
-                if err >= 0 {
-                    err -= err_dec;
-                    x = signed_add!(x, correction.0, usize);
-                    y = signed_add!(y, correction.1, usize);
+
+            if arrow_info.dx == 0 {
+                for _ in 0..arrow_info.dy {
+                    y = if arrow_info.incy { y + 1 } else { y - 1 };
+                    if !go((x, y)) {
+                        return;
+                    }
                 }
-                err += err_inc;
-                x = signed_add!(x, inc.0, usize);
-                y = signed_add!(y, inc.1, usize);
-                if !go(self, arrow_info, (x, y)) {
-                    return;
+            } else if arrow_info.dy == 0 {
+                for _ in 0..arrow_info.dx {
+                    x = if arrow_info.incx { x + 1 } else { x - 1 };
+                    if !go((x, y)) {
+                        return;
+                    }
+                }
+            } else {
+                // Bresenham's line algorithm
+                let (counter, mut err, err_inc, err_dec, inc, correction): (u8, i32, i32, i32, (i8, i8), (i8, i8)) = if arrow_info.dx > arrow_info.dy {
+                    (arrow_info.dx,
+                     arrow_info.dy as i32 * 2 - arrow_info.dx as i32,
+                     arrow_info.dy as i32 * 2,
+                     arrow_info.dx as i32 * 2,
+                     if arrow_info.incx { (1, 0) } else { (-1, 0) },
+                     if arrow_info.incy { (0, 1) } else { (0, -1) })
+                } else {
+                    (arrow_info.dy,
+                     arrow_info.dx as i32 * 2 - arrow_info.dy as i32,
+                     arrow_info.dx as i32 * 2,
+                     arrow_info.dy as i32 * 2,
+                     if arrow_info.incy { (0, 1) } else { (0, -1) },
+                     if arrow_info.incx { (1, 0) } else { (-1, 0) })
+                };
+                for _ in 0..counter {
+                    if err >= 0 {
+                        err -= err_dec;
+                        x = signed_add!(x, correction.0, usize);
+                        y = signed_add!(y, correction.1, usize);
+                    }
+                    err += err_inc;
+                    x = signed_add!(x, inc.0, usize);
+                    y = signed_add!(y, inc.1, usize);
+                    if !go((x, y)) {
+                        return;
+                    }
                 }
             }
         }
@@ -368,67 +375,68 @@ impl WorldData {
     }
 
     fn find_fiend(&self, my_xy: (usize, usize)) -> Option<(usize, usize)> {
-        fn fiend_predicate(world: &WorldData, (x, y): (usize, usize)) -> bool {
-            match world.mobiles[y][x] {
+        let fiend_predicate = |(x, y): (usize, usize)| {
+            match self.mobiles[y][x] {
                 Some(Fiend { .. }) => true,
                 _ => false,
             }
         };
-        self.find_nearest(fiend_predicate, my_xy)
+        find_nearest(fiend_predicate, my_xy)
     }
 
     fn find_obstacle(&self, my_xy: (usize, usize)) -> Option<(usize, usize)> {
-        fn obstacle_predicate(world: &WorldData, (x, y): (usize, usize)) -> bool {
-            match world.statics[y][x] {
+        let obstacle_predicate = |(x, y): (usize, usize)| {
+            match self.statics[y][x] {
                 Some(Obstacle { .. }) => true,
                 _ => false,
             }
         };
-        self.find_nearest(obstacle_predicate, my_xy)
+        find_nearest(obstacle_predicate, my_xy)
     }
 
     fn find_turret(&self, my_xy: (usize, usize)) -> Option<(usize, usize)> {
-        fn turret_predicate(world: &WorldData, (x, y): (usize, usize)) -> bool {
-            match world.statics[y][x] {
+        let turret_predicate = |(x, y): (usize, usize)| {
+            match self.statics[y][x] {
                 Some(Turret { .. }) => true,
                 _ => false,
             }
         };
-        self.find_nearest(turret_predicate, my_xy)
+        find_nearest(turret_predicate, my_xy)
     }
+}
 
-    fn find_nearest(&self,
-                    predicate: fn(&WorldData, (usize, usize)) -> bool,
-                    my_xy: (usize, usize))
-                    -> Option<(usize, usize)> {
-        // Much better would be to do some sort of moving out from the
-        // starting coordinates and stopping at the first found.
-        let mut found_xy = None;
-        let mut dist = 0.0;
-        for x in 0..X {
-            for y in 0..Y {
-                if !predicate(self, (x, y)) {
-                    continue;
-                }
+fn find_nearest<F>(predicate: F,
+                my_xy: (usize, usize))
+                -> Option<(usize, usize)>
+    where F: Fn((usize, usize)) -> bool
+{
+    // Much better would be to do some sort of moving out from the
+    // starting coordinates and stopping at the first found.
+    let mut found_xy = None;
+    let mut dist = 0.0;
+    for x in 0..X {
+        for y in 0..Y {
+            if !predicate((x, y)) {
+                continue;
+            }
 
-                match found_xy {
-                    Some(xy) => {
-                        let newdist = distance(xy, (x, y));
-                        if newdist < dist {
-                            found_xy = Some((x, y));
-                            dist = newdist;
-                        }
-                    }
-                    None => {
+            match found_xy {
+                Some(xy) => {
+                    let newdist = distance(xy, (x, y));
+                    if newdist < dist {
                         found_xy = Some((x, y));
-                        dist = distance(my_xy, (x, y));
+                        dist = newdist;
                     }
+                }
+                None => {
+                    found_xy = Some((x, y));
+                    dist = distance(my_xy, (x, y));
                 }
             }
         }
-
-        return found_xy;
     }
+
+    return found_xy;
 }
 
 // currently this is euclidean distance, but really it should be walking distance
