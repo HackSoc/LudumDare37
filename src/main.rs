@@ -35,7 +35,8 @@ fn initial_world() -> WorldData {
         },
         menu: Menu::Root,
         menu_index: 0,
-        placement: None
+        placement: None,
+        goal_location: (X / 2, Y / 2),
         log: ["".to_string(), "".to_string(), "".to_string(), "".to_string(), "".to_string()],
     };
     // add walls!

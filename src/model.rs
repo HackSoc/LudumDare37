@@ -121,6 +121,7 @@ pub struct WorldData {
     pub statics: [[Option<Static>; X]; Y],
     pub mobiles: [[Option<Mobile>; X]; Y],
     pub player_info: PlayerInfo,
+    pub goal_location: (usize, usize),
     pub fiends: BTreeSet<(usize, usize)>,
     pub turrets: BTreeSet<(usize, usize)>,
     pub arrows: BTreeSet<(usize, usize)>,
@@ -148,6 +149,6 @@ pub enum GameState {
     Startup,
     Construct,
     Fight { to_spawn: Vec<FiendInfo> },
-    GameOver,
+    GameOver { msg: String },
     End,
 }

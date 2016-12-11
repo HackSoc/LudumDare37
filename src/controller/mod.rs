@@ -41,7 +41,7 @@ impl GameState {
             Startup => *self = Construct,
             Construct => self.construct_handler(world_data, i),
             Fight { .. } => self.fight_handler(world_data, i),
-            GameOver => unimplemented!(),
+            GameOver { .. } => self.gameover_handler(i),
             End => panic!("Should have ended and didn't!"),
         };
     }
@@ -173,6 +173,16 @@ impl GameState {
         };
     }
 
+    fn gameover_handler(&mut self, i: Input) {
+        match i {
+            Character('q') => {
+                *self = End;
+                return;
+            }
+            _ => {}
+        }
+    }
+
     fn fight_handler(&mut self, world_data: &mut WorldData, i: Input) {
         match i {
             KeyDown | Character('s') => {
@@ -268,6 +278,18 @@ impl GameState {
         match *self {
             Fight { ref mut to_spawn } => spawn_fiends(world_data, to_spawn),
             _ => {}
+        }
+
+        // Check for game over
+        if world_data.player_info.health == 0 {
+            *self = GameOver { msg: "You have died!".to_string() }
+        } else {
+            match world_data.statics[world_data.goal_location.1][world_data.goal_location.0] {
+                Some(Goal { health, .. }) if health == 0 => {
+                    *self = GameOver { msg: "The Yendow is destroyed!".to_string() }
+                }
+                _ => {}
+            }
         }
     }
 }
