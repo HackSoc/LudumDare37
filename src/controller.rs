@@ -4,7 +4,7 @@ use pancurses::Input;
 use pancurses::Input::*;
 
 use std::cmp::{min, max};
-use std::collections::LinkedList;
+use std::collections::BTreeSet;
 use std::ops::Sub;
 
 // I felt like making this a macro
@@ -408,61 +408,35 @@ impl WorldData {
     }
 
     fn find_fiend(&self, my_xy: (usize, usize)) -> Option<(usize, usize)> {
-        let fiend_predicate = |(x, y): (usize, usize)| {
-            match self.mobiles[y][x] {
-                Some(Fiend { .. }) => true,
-                _ => false,
-            }
-        };
-        find_nearest(fiend_predicate, my_xy)
+        find_nearest(&self.fiends, my_xy)
     }
 
     fn find_obstacle(&self, my_xy: (usize, usize)) -> Option<(usize, usize)> {
-        let obstacle_predicate = |(x, y): (usize, usize)| {
-            match self.statics[y][x] {
-                Some(Obstacle { .. }) => true,
-                _ => false,
-            }
-        };
-        find_nearest(obstacle_predicate, my_xy)
+        find_nearest(&self.obstacles, my_xy)
     }
 
     fn find_turret(&self, my_xy: (usize, usize)) -> Option<(usize, usize)> {
-        let turret_predicate = |(x, y): (usize, usize)| {
-            match self.statics[y][x] {
-                Some(Turret { .. }) => true,
-                _ => false,
-            }
-        };
-        find_nearest(turret_predicate, my_xy)
+        find_nearest(&self.turrets, my_xy)
     }
 }
 
-fn find_nearest<F>(predicate: F, my_xy: (usize, usize)) -> Option<(usize, usize)>
-    where F: Fn((usize, usize)) -> bool
-{
-    // Much better would be to do some sort of moving out from the
-    // starting coordinates and stopping at the first found.
+fn find_nearest(points: &BTreeSet<(usize, usize)>,
+                my_xy: (usize, usize))
+                -> Option<(usize, usize)> {
     let mut found_xy = None;
     let mut dist = 0;
-    for x in 0..X {
-        for y in 0..Y {
-            if !predicate((x, y)) {
-                continue;
+    for xy in points {
+        match found_xy {
+            Some(xy) => {
+                let newdist = distance(xy, my_xy);
+                if newdist < dist {
+                    found_xy = Some(xy);
+                    dist = newdist;
+                }
             }
-
-            match found_xy {
-                Some(xy) => {
-                    let newdist = distance(xy, (x, y));
-                    if newdist < dist {
-                        found_xy = Some((x, y));
-                        dist = newdist;
-                    }
-                }
-                None => {
-                    found_xy = Some((x, y));
-                    dist = distance(my_xy, (x, y));
-                }
+            None => {
+                found_xy = Some(*xy);
+                dist = distance(*xy, my_xy);
             }
         }
     }
