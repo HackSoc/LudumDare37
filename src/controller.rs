@@ -59,11 +59,13 @@ impl Mobile {
         };
     }
 
-    fn fiend_interact(&mut self, fiend_info: &FiendInfo, player_info: &PlayerInfo) {
+    fn fiend_interact(&mut self, fiend_info: &FiendInfo, player_info: &mut PlayerInfo) {
         match *self {
             Arrow { .. } => {}
             Fiend { .. } => {}
-            Player => Fiend { info: *fiend_info }.player_interact(player_info),
+            Player => {
+                player_info.health = player_info.health.saturating_sub(fiend_info.damage_factor)
+            }
         };
     }
 }
@@ -234,7 +236,7 @@ impl WorldData {
         };
         match self.mobiles[new_y][new_x] {
             Some(mut mob) => {
-                mob.fiend_interact(&fiend_info, &self.player_info);
+                mob.fiend_interact(&fiend_info, &mut self.player_info);
                 return;
             }
             None => {} // we can move into an empty space
