@@ -1,10 +1,11 @@
 extern crate astar;
 extern crate pancurses;
+extern crate rand;
 
 mod controller;
 mod model;
 mod view;
-mod enemies;
+mod fiends;
 mod util;
 
 use std::collections::BTreeSet;
@@ -77,9 +78,9 @@ fn initial_world() -> WorldData {
     world_data.turrets.insert((X / 2 + 1, Y / 2));
 
     // Some example enemies.
-    world_data.mobiles[Y - 1][1 + (X / 2) - 3] = Some(enemies::kobold());
-    world_data.mobiles[Y - 3][3 + (X / 2) - 3] = Some(enemies::kobold());
-    world_data.mobiles[Y - 1][5 + (X / 2) - 3] = Some(enemies::kobold());
+    world_data.mobiles[Y - 1][1 + (X / 2) - 3] = fiends::make_fiend(15);
+    world_data.mobiles[Y - 3][3 + (X / 2) - 3] = fiends::make_fiend(15);
+    world_data.mobiles[Y - 1][5 + (X / 2) - 3] = fiends::make_fiend(15);
     world_data.fiends.insert((1 + (X / 2) - 3, Y - 1));
     world_data.fiends.insert((3 + (X / 2) - 3, Y - 3));
     world_data.fiends.insert((5 + (X / 2) - 3, Y - 1));
