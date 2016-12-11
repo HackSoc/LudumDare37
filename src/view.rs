@@ -20,14 +20,16 @@ pub fn setup_render() {
 }
 
 impl WorldData {
+    #[cfg_attr(rustfmt, rustfmt_skip)]
     pub fn render(&self, window: &Window) {
         for row_n in 0..Y {
             for col_n in 0..X {
-                let ch = self.mobiles[row_n][col_n].map_or(self.statics[row_n][col_n]
-                                                               .map_or(EMPTY_CELL, |s| {
-                                                                   self.render_static(row_n, s)
-                                                               }),
-                                                           |m| self.render_mobile(m));
+                let ch = self.mobiles[row_n][col_n].map_or(
+                    self.statics[row_n][col_n].map_or(
+                        EMPTY_CELL, |s| {
+                            self.render_static(row_n, s)
+                        }),
+                    |m| self.render_mobile(m));
                 window.mvaddch(row_n as i32, col_n as i32, ch);
             }
         }
