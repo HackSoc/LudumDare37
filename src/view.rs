@@ -18,7 +18,7 @@ pub struct GameWindows {
     log: Window,
 }
 
-impl GameWindows{
+impl GameWindows {
     fn refresh(&self) {
         self.stats.refresh();
         self.view.refresh();
@@ -60,25 +60,23 @@ impl WorldData {
     pub fn render(&self, windows: &GameWindows, game_state: &GameState) {
         match *game_state {
             Construct => self.render_construct(windows),
-            Fight => self.render_fight(windows),
+            Fight { .. } => self.render_fight(windows),
             _ => unimplemented!()
         };
     }
 
     pub fn render_construct(&self, windows: &GameWindows) {
         windows.help.erase();
-        windows.help.draw_box(0,0);
-        windows.help.mvaddstr(1,1,"THING PROTECTOR");
+        windows.help.draw_box(0, 0);
+        windows.help.mvaddstr(1, 1, "THING PROTECTOR");
         for row_n in 0..Y {
             for col_n in 0..X {
-                let ch = self.statics[row_n][col_n].map_or(
-                    EMPTY_CELL, |s| {
-                        self.render_static(row_n, s)
-                    });
+                let ch = self.statics[row_n][col_n]
+                    .map_or(EMPTY_CELL, |s| self.render_static(row_n, s));
                 windows.view.mvaddch(row_n as i32, col_n as i32, ch);
             }
         }
-        
+
         match self.menu {
             Menu::Root => {
                 windows.help.mvaddstr(3, 3, "Build");
@@ -96,49 +94,52 @@ impl WorldData {
                 windows.help.mvaddch(self.menu_index as i32 + 3, 13, '<');
             }
 
-
             Menu::Place => {
                 let placement = self.placement.expect("Want to place but nothing to place!");
                 windows.help.mvaddstr(3, 3, "Placing a");
-                windows.help.mvaddstr(4, 3, match placement {Turret{..} => "Turret", Obstacle{..} => "Obstacle", _ => "Error"});
-                windows.view.mvaddch(self.player_info.location.1 as i32, self.player_info.location.0 as i32, self.render_static(1,placement));
-                
+                windows.help.mvaddstr(4,
+                                      3,
+                                      match placement {
+                                          Turret { .. } => "Turret",
+                                          Obstacle { .. } => "Obstacle",
+                                          _ => "Error",
+                                      });
+                windows.view.mvaddch(self.player_info.location.1 as i32,
+                                     self.player_info.location.0 as i32,
+                                     self.render_static(1, placement));
+
             }
-            _ => unimplemented!()
+            _ => unimplemented!(),
         }
         windows.refresh();
     }
-    
+
     pub fn render_fight(&self, windows: &GameWindows) {
         for row_n in 0..Y {
             for col_n in 0..X {
-                let ch = self.mobiles[row_n][col_n].map_or(
-                    self.statics[row_n][col_n].map_or(
-                        EMPTY_CELL, |s| {
-                            self.render_static(row_n, s)
-                        }),
-                    |m| self.render_mobile(m));
+                let ch = self.mobiles[row_n][col_n].map_or(self.statics[row_n][col_n]
+                                                               .map_or(EMPTY_CELL, |s| {
+                                                                   self.render_static(row_n, s)
+                                                               }),
+                                                           |m| self.render_mobile(m));
                 windows.view.mvaddch(row_n as i32, col_n as i32, ch);
             }
         }
-        let stat_string = format!(
-            "Health: {:3} | \
-             Thing Integrity: {:3} | \
-             Wave: {:3}",
-            self.player_info.health,
-            match self.statics[Y/2][X/2] {
-                Some(Goal{health: h, ..}) => h,
-                _ => 0
-            },
-            1);
+        let stat_string = format!("Health: {:3} | Thing Integrity: {:3} | Wave: {:3}",
+                                  self.player_info.health,
+                                  match self.statics[Y / 2][X / 2] {
+                                      Some(Goal { health: h, .. }) => h,
+                                      _ => 0,
+                                  },
+                                  1);
 
-        let offset = (X-stat_string.len()) as i32/2;
+        let offset = (X - stat_string.len()) as i32 / 2;
         windows.stats.mvaddstr(2, offset, stat_string.as_str());
         windows.stats.refresh();
 
         windows.view.refresh();
 
-        windows.help.mvaddstr(1,1,"THING PROTECTOR");
+        windows.help.mvaddstr(1, 1, "THING PROTECTOR");
         windows.help.refresh();
 
         windows.log.refresh();

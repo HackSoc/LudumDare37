@@ -101,22 +101,21 @@ pub enum Menu {
     Upgrade,
     Continue,
     Place,
-    Move2
+    Move2,
 }
 
-/*
-pub enum RootItem {
-    Build,
-    Move,
-    Upgrade,
-    Continue
-}
-
-pub enum BuildItem {
-    Turret,
-    Obstacle
-}
-*/
+// pub enum RootItem {
+// Build,
+// Move,
+// Upgrade,
+// Continue
+// }
+//
+// pub enum BuildItem {
+// Turret,
+// Obstacle
+// }
+//
 
 pub struct WorldData {
     pub statics: [[Option<Static>; X]; Y],
@@ -126,9 +125,10 @@ pub struct WorldData {
     pub turrets: BTreeSet<(usize, usize)>,
     pub arrows: BTreeSet<(usize, usize)>,
     pub obstacles: BTreeSet<(usize, usize)>,
+    pub gates: BTreeSet<(usize, usize)>,
     pub menu: Menu,
     pub menu_index: usize,
-    pub placement: Option<Static>
+    pub placement: Option<Static>,
 }
 
 pub use self::GameState::*;
@@ -136,9 +136,7 @@ pub use self::GameState::*;
 pub enum GameState {
     Startup,
     Construct,
-    Fight,
+    Fight { to_spawn: Vec<FiendInfo> },
     GameOver,
     End,
 }
-
-

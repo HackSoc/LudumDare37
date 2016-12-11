@@ -16,6 +16,8 @@ use pancurses::*;
 
 use rand::{Rng, thread_rng};
 
+use fiends::make_wave;
+
 fn initial_world() -> WorldData {
     let mut world_data = WorldData {
         statics: [[None; X]; Y],
@@ -24,6 +26,7 @@ fn initial_world() -> WorldData {
         arrows: BTreeSet::new(),
         turrets: BTreeSet::new(),
         obstacles: BTreeSet::new(),
+        gates: BTreeSet::new(),
         player_info: PlayerInfo {
             location: (20, 20),
             health: 100,
@@ -53,13 +56,19 @@ fn initial_world() -> WorldData {
 
     // add gates!
     for x in 0..7 {
-        world_data.statics[0][x + (X / 2) - 3] = Some(Gate);
-        world_data.statics[Y - 1][x + (X / 2) - 3] = Some(Gate);
+        let gx = x + (X / 2) - 3;
+        world_data.statics[0][gx] = Some(Gate);
+        world_data.statics[Y - 1][gx] = Some(Gate);
+        world_data.gates.insert((gx, 0));
+        world_data.gates.insert((gx, Y - 1));
     }
 
     for y in 0..7 {
-        world_data.statics[y + (Y / 2) - 3][0] = Some(Gate);
-        world_data.statics[y + (Y / 2) - 3][X - 1] = Some(Gate);
+        let gy = y + (Y / 2) - 3;
+        world_data.statics[gy][0] = Some(Gate);
+        world_data.statics[gy][X - 1] = Some(Gate);
+        world_data.gates.insert((0, gy));
+        world_data.gates.insert((X - 1, gy));
     }
 
     world_data.mobiles[20][20] = Some(Player);
@@ -78,14 +87,6 @@ fn initial_world() -> WorldData {
     world_data.statics[Y / 2][X / 2 + 1] = Some(Turret { info: turret_info });
     world_data.turrets.insert((X / 2 - 1, Y / 2));
     world_data.turrets.insert((X / 2 + 1, Y / 2));
-
-    // Some example enemies.
-    let wave = fiends::make_wave(1);
-    for fiend in wave {
-        let x = thread_rng().gen_range(1, 6) + (X / 2) - 3;
-        world_data.mobiles[Y - 1][x] = Some(Fiend { info: fiend });
-        world_data.fiends.insert((x, Y - 1));
-    }
 
     return world_data;
 }
