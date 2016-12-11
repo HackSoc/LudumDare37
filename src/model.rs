@@ -6,20 +6,20 @@ pub use self::Static::*;
 pub enum Static {
     Wall,
     Gate,
-    Goal { health: u8, max_health: u8 },
+    Goal { health: usize, max_health: usize },
     Turret { info: TurretInfo },
-    Obstacle { health: u8, max_health: u8 },
+    Obstacle { health: usize, max_health: usize },
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct TurretInfo {
     pub form: (),
-    pub cooldown: u8,
-    pub max_cooldown: u8,
-    pub range: u8,
-    pub health: u8,
-    pub max_health: u8,
-    pub arrow_speed: u8,
+    pub cooldown: usize,
+    pub max_cooldown: usize,
+    pub range: usize,
+    pub health: usize,
+    pub max_health: usize,
+    pub arrow_speed: usize,
 }
 
 pub use self::Mobile::*;
@@ -42,34 +42,34 @@ impl Mobile {
 #[derive(Clone, Copy, PartialEq)]
 pub struct PlayerInfo {
     pub location: (usize, usize),
-    pub health: u8,
-    pub max_health: u8,
-    pub damage_factor: u8,
-    pub heal_factor: u8,
-    pub armour_factor: u8,
+    pub health: usize,
+    pub max_health: usize,
+    pub damage_factor: usize,
+    pub heal_factor: usize,
+    pub armour_factor: usize,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct FiendInfo {
     pub ch: char,
     pub form: (),
-    pub health: u8,
-    pub max_health: u8,
-    pub damage_factor: u8,
-    pub armour_factor: u8,
-    pub player_target_distance: u8,
-    pub goal_target_distance: u8,
-    pub turret_target_distance: u8,
-    pub obstacle_target_distance: u8,
+    pub health: usize,
+    pub max_health: usize,
+    pub damage_factor: usize,
+    pub armour_factor: usize,
+    pub player_target_distance: usize,
+    pub goal_target_distance: usize,
+    pub turret_target_distance: usize,
+    pub obstacle_target_distance: usize,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct ArrowInfo {
-    pub dx: u8,
-    pub dy: u8,
+    pub dx: usize,
+    pub dy: usize,
     pub incx: bool,
     pub incy: bool,
-    pub damage_factor: u8,
+    pub damage_factor: usize,
 }
 
 pub struct WorldData {

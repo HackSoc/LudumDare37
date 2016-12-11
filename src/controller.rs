@@ -187,16 +187,16 @@ impl WorldData {
         let obstacle_xy = self.find_obstacle(old_xy);
 
         let (target_x, target_y) = match (turret_xy, obstacle_xy) {
-            _ if distance(old_xy, goal_xy) <= fiend_info.goal_target_distance as usize => {
+            _ if distance(old_xy, goal_xy) <= fiend_info.goal_target_distance => {
                 goal_xy // move towards goal
             }
-            _ if distance(old_xy, player_xy) <= fiend_info.player_target_distance as usize => {
+            _ if distance(old_xy, player_xy) <= fiend_info.player_target_distance => {
                 player_xy // move towards player
             }
-            (Some(xy), _) if distance(old_xy, xy) <= fiend_info.turret_target_distance as usize => {
+            (Some(xy), _) if distance(old_xy, xy) <= fiend_info.turret_target_distance => {
                 xy // move towards turret
             }
-            (_, Some(xy)) if distance(old_xy, xy) <= fiend_info.obstacle_target_distance as usize => {
+            (_, Some(xy)) if distance(old_xy, xy) <= fiend_info.obstacle_target_distance => {
                 xy // move towards obstacle
             }
             _ => {
@@ -278,9 +278,9 @@ impl WorldData {
                     let arrow = Arrow {
                         info: ArrowInfo {
                             dx: (dx as f64 / magnitude * turret_info.arrow_speed as f64)
-                                .trunc() as u8,
+                                .trunc() as usize,
                             dy: (dy as f64 / magnitude * turret_info.arrow_speed as f64)
-                                .trunc() as u8,
+                                .trunc() as usize,
                             incx: incx,
                             incy: incy,
                             damage_factor: 300,
@@ -346,7 +346,7 @@ impl WorldData {
             } else {
                 // Bresenham's line algorithm
                 let gdx = dx > dy;
-                let counter: u8 = if gdx { dx } else { dy };
+                let counter = if gdx { dx } else { dy };
                 let mut err: i32 = if gdx {
                     dy as i32 * 2 - dx as i32
                 } else {
@@ -448,10 +448,12 @@ fn find_nearest<F>(predicate: F, my_xy: (usize, usize)) -> Option<(usize, usize)
 
 // implements Chebyshev distance https://en.wikipedia.org/wiki/Chebyshev_distance
 fn distance<T>((x1, y1): (T, T), (x2, y2): (T, T)) -> T::Output
-    where T: Sub + Ord + Copy, <T as Sub>::Output: Ord {
-    let dx = max(x1,x2) - min(x1,x2);
-    let dy = max(y1,y2) - min(y1,y2);
-    return max(dx,dy);
+    where T: Sub + Ord + Copy,
+          <T as Sub>::Output: Ord
+{
+    let dx = max(x1, x2) - min(x1, x2);
+    let dy = max(y1, y2) - min(y1, y2);
+    return max(dx, dy);
 }
 
 fn make_delta(start: usize, end: usize) -> (usize, bool) {
