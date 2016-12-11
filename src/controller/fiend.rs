@@ -44,7 +44,7 @@ impl WorldData {
         };
 
         match self.statics[new_y][new_x] {
-            Some(Wall) | Some(Gate) => return,
+            Some(Wall) => return,
             Some(Obstacle { health, max_health }) => {
                 self.statics[new_y][new_x] = Some(Obstacle {
                     health: health.saturating_sub(fiend_info.damage_factor),
@@ -64,8 +64,7 @@ impl WorldData {
                 self.statics[new_y][new_x] = Some(Turret { info: info });
                 return;
             }
-            Some(Turret { .. }) => {} // a broken turret can be bypassed
-            None => {} // we can move into an empty space
+            _ => {} // we can move into an empty space, and also broken turrets and gates.
         };
         match self.mobiles[new_y][new_x] {
             Some(Arrow { .. }) => return, // TODO: be damaged
