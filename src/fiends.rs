@@ -26,7 +26,7 @@ const MAX_TYPES: [(usize, usize); 4] = [(2, 2), (5, 3), (10, 5), (15, 10)];
 
 pub fn make_wave(wave: usize) -> Vec<FiendInfo> {
     // TODO: boss monsters every so often.
-    let points = 50 + wave * wave * (wave as f64).ln().trunc() as usize;
+    let points = 25 + wave * (wave as f64).ln().trunc() as usize;
 
     // Work out how many types of fiend we'll have.
     let mut max_types = 1;
