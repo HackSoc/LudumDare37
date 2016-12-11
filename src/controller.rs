@@ -5,6 +5,7 @@ use pancurses::Input::*;
 
 use std::cmp::{min, max};
 use std::collections::LinkedList;
+use std::ops::Sub;
 
 // I felt like making this a macro
 macro_rules! signed_add {
@@ -186,16 +187,16 @@ impl WorldData {
         let obstacle_xy = self.find_obstacle(old_xy);
 
         let (target_x, target_y) = match (turret_xy, obstacle_xy) {
-            _ if distance(old_xy, goal_xy) <= fiend_info.goal_target_distance as f64 => {
+            _ if distance(old_xy, goal_xy) <= fiend_info.goal_target_distance as usize => {
                 goal_xy // move towards goal
             }
-            _ if distance(old_xy, player_xy) <= fiend_info.player_target_distance as f64 => {
+            _ if distance(old_xy, player_xy) <= fiend_info.player_target_distance as usize => {
                 player_xy // move towards player
             }
-            (Some(xy), _) if distance(old_xy, xy) <= fiend_info.turret_target_distance as f64 => {
+            (Some(xy), _) if distance(old_xy, xy) <= fiend_info.turret_target_distance as usize => {
                 xy // move towards turret
             }
-            (_, Some(xy)) if distance(old_xy, xy) <= fiend_info.obstacle_target_distance as f64 => {
+            (_, Some(xy)) if distance(old_xy, xy) <= fiend_info.obstacle_target_distance as usize => {
                 xy // move towards obstacle
             }
             _ => {
@@ -269,7 +270,7 @@ impl WorldData {
             }
 
             match self.find_fiend(xy) {
-                Some(fiend_xy) if distance(xy, fiend_xy) <= turret_info.range as f64 => {
+                Some(fiend_xy) if distance(xy, fiend_xy) <= turret_info.range as usize => {
                     let (fiend_x, fiend_y) = fiend_xy;
                     let (dx, incx) = make_delta(x, fiend_x);
                     let (dy, incy) = make_delta(y, fiend_y);
@@ -419,7 +420,7 @@ fn find_nearest<F>(predicate: F, my_xy: (usize, usize)) -> Option<(usize, usize)
     // Much better would be to do some sort of moving out from the
     // starting coordinates and stopping at the first found.
     let mut found_xy = None;
-    let mut dist = 0.0;
+    let mut dist = 0;
     for x in 0..X {
         for y in 0..Y {
             if !predicate((x, y)) {
@@ -445,11 +446,12 @@ fn find_nearest<F>(predicate: F, my_xy: (usize, usize)) -> Option<(usize, usize)
     return found_xy;
 }
 
-// currently this is euclidean distance, but really it should be walking distance
-fn distance((x1, y1): (usize, usize), (x2, y2): (usize, usize)) -> f64 {
-    let dx = x1 as f64 - x2 as f64;
-    let dy = y1 as f64 - y2 as f64;
-    return (dx * dx + dy * dy).sqrt();
+// implements Chebyshev distance https://en.wikipedia.org/wiki/Chebyshev_distance
+fn distance<T>((x1, y1): (T, T), (x2, y2): (T, T)) -> T::Output
+    where T: Sub + Ord + Copy, <T as Sub>::Output: Ord {
+    let dx = max(x1,x2) - min(x1,x2);
+    let dy = max(y1,y2) - min(y1,y2);
+    return max(dx,dy);
 }
 
 fn make_delta(start: usize, end: usize) -> (usize, bool) {
