@@ -1,3 +1,4 @@
+extern crate astar;
 extern crate pancurses;
 
 mod controller;

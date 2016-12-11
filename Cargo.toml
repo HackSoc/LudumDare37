@@ -4,4 +4,5 @@ version = "0.1.0"
 authors = ["Nathan van Doorn <nvd1234@gmail.com>", "Michael Walker <mike@barrucadu.co.uk"]
 
 [dependencies]
+astar     = "0.1.1"
 pancurses = "0.7.0"
