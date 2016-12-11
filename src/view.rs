@@ -28,10 +28,9 @@ pub fn setup_render(window: &Window) -> GameWindows {
     let stats = window.subwin(5, X as i32, 0, 0).unwrap();
     stats.keypad(true);
     stats.draw_box(0, 0);
-    stats.mvaddstr(3, 2, "THIS IS THE STATUS BOX");
     let view = window.subwin(Y as i32, X as i32, 5, 0).unwrap();
     view.keypad(true);
-    let help = window.subwin(5 + Y as i32 + 7, 10, 0, X as i32).unwrap();
+    let help = window.subwin(5 + Y as i32 + 7, 80 - X as i32, 0, X as i32).unwrap();
     help.draw_box(0, 0);
     help.keypad(true);
     let log = window.subwin(7, X as i32, 5 + Y as i32, 0).unwrap();
@@ -59,6 +58,20 @@ impl WorldData {
                 windows.view.mvaddch(row_n as i32, col_n as i32, ch);
             }
         }
+        let stat_string = format!(
+            "Health: {:3} | \
+             Yendow Integrity: {:3} | \
+             Wave: {:3}",
+            self.player_info.health,
+            match self.statics[Y/2][X/2] {
+                Some(Goal{health: h, ..}) => h,
+                _ => 0
+            },
+            1);
+
+        let offset = (X-stat_string.len()) as i32/2;
+
+        windows.stats.mvaddstr(2, offset, stat_string.as_str());
         windows.stats.refresh();
         windows.view.refresh();
         windows.help.refresh();
