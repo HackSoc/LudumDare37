@@ -10,16 +10,16 @@ const DAMAGED_TURRET_COLORS: color_pair = 3;
 
 const EMPTY_CELL: chtype = ' ' as u32;
 
-impl WorldData {
-    pub fn setup_render(&self) {
-        start_color();
-        use_default_colors();
-        init_pair(DEFAULT_COLORS as i16, COLOR_WHITE, -1);
-        init_pair(GOAL_COLORS as i16, COLOR_YELLOW, -1);
-        init_pair(BROKEN_TURRET_COLORS as i16, COLOR_RED, -1);
-        init_pair(DAMAGED_TURRET_COLORS as i16, COLOR_MAGENTA, -1);
-    }
+pub fn setup_render() {
+    start_color();
+    use_default_colors();
+    init_pair(DEFAULT_COLORS as i16, COLOR_WHITE, -1);
+    init_pair(GOAL_COLORS as i16, COLOR_YELLOW, -1);
+    init_pair(BROKEN_TURRET_COLORS as i16, COLOR_RED, -1);
+    init_pair(DAMAGED_TURRET_COLORS as i16, COLOR_MAGENTA, -1);
+}
 
+impl WorldData {
     pub fn render(&self, window: &Window) {
         for row_n in 0..Y {
             for col_n in 0..X {

@@ -83,3 +83,14 @@ pub struct WorldData {
     pub arrows: BTreeSet<(usize, usize)>,
     pub obstacles: BTreeSet<(usize, usize)>,
 }
+
+#[derive(PartialEq, Eq)]
+pub enum GameState {
+    Startup,
+    Build,
+    Fight,
+    GameOver,
+    End,
+}
+
+pub use self::GameState::*;

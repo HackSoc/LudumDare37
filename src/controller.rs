@@ -20,17 +20,6 @@ macro_rules! signed_add {
     }}
 }
 
-#[derive(PartialEq, Eq)]
-pub enum GameState {
-    Startup,
-    Build,
-    Fight,
-    GameOver,
-    End,
-}
-
-pub use self::GameState::*;
-
 enum Dir {
     N,
     E,

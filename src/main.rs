@@ -87,10 +87,10 @@ fn main() {
     let _ = noecho();
     let _ = curs_set(0);
     let mut world_data = initial_world();
-    world_data.setup_render();
+    view::setup_render();
     let _ = window.keypad(true);
-    let mut gamestate = controller::Fight;
-    while gamestate != controller::End {
+    let mut gamestate = model::Fight;
+    while gamestate != model::End {
         world_data.render(&window);
         if let Some(i) = window.getch() {
             gamestate.handle(&mut world_data, i)
