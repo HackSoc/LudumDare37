@@ -169,7 +169,7 @@ impl WorldData {
             Some(Arrow { .. }) => return,
             Some(Fiend { mut info }) => {
                 info.health = info.health.saturating_sub(self.player_info.damage_factor);
-                self.mobiles[new_y][new_x] = Some(Fiend{info:info});
+                self.mobiles[new_y][new_x] = Some(Fiend { info: info });
             }
             Some(Player) => panic!("Player walked into themself"),
             None => {} // we can move into an empty space
@@ -232,8 +232,9 @@ impl WorldData {
             Some(Arrow { .. }) => return, // TODO: be damaged
             Some(Fiend { .. }) => return, // TODO: try moving elsewhere
             Some(Player) => {
-                self.player_info.health = self.player_info.health.saturating_sub(fiend_info.damage_factor);
-                return
+                self.player_info.health =
+                    self.player_info.health.saturating_sub(fiend_info.damage_factor);
+                return;
             }
             None => {} // we can move into an empty space
         }
@@ -299,7 +300,7 @@ impl WorldData {
                     (Some(Gate), _) => false,
                     (_, Some(Fiend { mut info })) => {
                         info.health = info.health.saturating_sub(arrow_info.damage_factor);
-                        self.mobiles[y][x] = Some(Fiend{info:info});
+                        self.mobiles[y][x] = Some(Fiend { info: info });
                         false
                     }
                     (_, Some(_)) => false,
@@ -307,36 +308,45 @@ impl WorldData {
                 }
             };
 
-            if arrow_info.dx == 0 {
-                for _ in 0..arrow_info.dy {
-                    y = if arrow_info.incy { y + 1 } else { y - 1 };
+            let dx = arrow_info.dx;
+            let dy = arrow_info.dy;
+            let incx = arrow_info.incx;
+            let incy = arrow_info.incy;
+
+            if dx == 0 {
+                for _ in 0..dy {
+                    y = if incy { y + 1 } else { y - 1 };
                     if !go((x, y)) {
                         return;
                     }
                 }
-            } else if arrow_info.dy == 0 {
-                for _ in 0..arrow_info.dx {
-                    x = if arrow_info.incx { x + 1 } else { x - 1 };
+            } else if dy == 0 {
+                for _ in 0..dx {
+                    x = if incx { x + 1 } else { x - 1 };
                     if !go((x, y)) {
                         return;
                     }
                 }
             } else {
                 // Bresenham's line algorithm
-                let (counter, mut err, err_inc, err_dec, inc, correction): (u8, i32, i32, i32, (i8, i8), (i8, i8)) = if arrow_info.dx > arrow_info.dy {
-                    (arrow_info.dx,
-                     arrow_info.dy as i32 * 2 - arrow_info.dx as i32,
-                     arrow_info.dy as i32 * 2,
-                     arrow_info.dx as i32 * 2,
-                     if arrow_info.incx { (1, 0) } else { (-1, 0) },
-                     if arrow_info.incy { (0, 1) } else { (0, -1) })
+                let gdx = dx > dy;
+                let counter: u8 = if gdx { dx } else { dy };
+                let mut err: i32 = if gdx {
+                    dy as i32 * 2 - dx as i32
                 } else {
-                    (arrow_info.dy,
-                     arrow_info.dx as i32 * 2 - arrow_info.dy as i32,
-                     arrow_info.dx as i32 * 2,
-                     arrow_info.dy as i32 * 2,
-                     if arrow_info.incy { (0, 1) } else { (0, -1) },
-                     if arrow_info.incx { (1, 0) } else { (-1, 0) })
+                    dx as i32 * 2 - dy as i32
+                };
+                let err_inc: i32 = if gdx { dy as i32 * 2 } else { dx as i32 * 2 };
+                let err_dec: i32 = if gdx { dx as i32 * 2 } else { dy as i32 * 2 };
+                let inc: (i8, i8) = if gdx {
+                    if incx { (1, 0) } else { (-1, 0) }
+                } else {
+                    if incy { (0, 1) } else { (0, -1) }
+                };
+                let correction: (i8, i8) = if gdx {
+                    if incy { (0, 1) } else { (0, -1) }
+                } else {
+                    if incx { (1, 0) } else { (-1, 0) }
                 };
                 for _ in 0..counter {
                     if err >= 0 {
@@ -388,9 +398,7 @@ impl WorldData {
     }
 }
 
-fn find_nearest<F>(predicate: F,
-                my_xy: (usize, usize))
-                -> Option<(usize, usize)>
+fn find_nearest<F>(predicate: F, my_xy: (usize, usize)) -> Option<(usize, usize)>
     where F: Fn((usize, usize)) -> bool
 {
     // Much better would be to do some sort of moving out from the
