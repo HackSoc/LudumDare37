@@ -156,6 +156,8 @@ impl WorldData {
             Dir::W => new_x = old_x - 1,
         };
         match self.statics[new_y][new_x] {
+            // Broken turrets can be moved through.
+            Some(Turret { info: TurretInfo { health, .. } }) if health == 0 => {}
             Some(mut sta) => {
                 sta.player_interact(&self.player_info);
                 self.statics[new_y][new_x] = Some(sta);
