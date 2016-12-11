@@ -283,16 +283,16 @@ impl WorldData {
         // returns 'true' if movement should continue ('false' if the
         // arrow hits something and gets destroyed)
         fn go(world: &WorldData, arrow_info: ArrowInfo, (x, y): (usize, usize)) -> bool {
-            if world.statics[y][x].is_some() || world.mobiles[y][x].is_some() {
-                match world.mobiles[y][x] {
-                    Some(Fiend { mut info }) => {
-                        info.health = info.health.saturating_sub(arrow_info.damage_factor)
-                    }
-                    _ => {}
+            match (world.statics[y][x], world.mobiles[y][x]) {
+                (Some(Wall), _) => false,
+                (Some(Gate), _) => false,
+                (_, Some(Fiend { mut info })) => {
+                    info.health = info.health.saturating_sub(arrow_info.damage_factor);
+                    false
                 }
-                return false;
+                (_, Some(_)) => false,
+                _ => true,
             }
-            return true;
         }
 
         let arrow = self.mobiles[old_y][old_x];
