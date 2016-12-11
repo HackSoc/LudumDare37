@@ -48,17 +48,6 @@ impl Static {
             }
         };
     }
-
-    fn fiend_interact(&mut self, fiend_info: &FiendInfo) {
-        match *self {
-            Wall | Gate => {}
-            Obstacle { mut health, .. } |
-            Goal { mut health, .. } |
-            Turret { info: TurretInfo { mut health, .. } } => {
-                health = health.saturating_sub(fiend_info.damage_factor)
-            }
-        }
-    }
 }
 
 impl GameState {
@@ -231,8 +220,24 @@ impl WorldData {
         };
 
         match self.statics[new_y][new_x] {
-            Some(mut sta) => {
-                sta.fiend_interact(&fiend_info);
+            Some(Wall) | Some(Gate) => return,
+            Some(Obstacle { health, max_health }) => {
+                self.statics[new_y][new_x] = Some(Obstacle {
+                    health: health.saturating_sub(fiend_info.damage_factor),
+                    max_health: max_health,
+                });
+                return;
+            }
+            Some(Goal { health, max_health }) => {
+                self.statics[new_y][new_x] = Some(Goal {
+                    health: health.saturating_sub(fiend_info.damage_factor),
+                    max_health: max_health,
+                });
+                return;
+            }
+            Some(Turret { mut info }) => {
+                info.health = info.health.saturating_sub(fiend_info.damage_factor);
+                self.statics[new_y][new_x] = Some(Turret { info: info });
                 return;
             }
             None => {} // we can move into an empty space
