@@ -299,12 +299,13 @@ impl WorldData {
     fn step_arrow(&mut self, (old_x, old_y): (usize, usize), arrow_info: ArrowInfo) {
         // returns 'true' if movement should continue ('false' if the
         // arrow hits something and gets destroyed)
-        fn go(world: &WorldData, arrow_info: ArrowInfo, (x, y): (usize, usize)) -> bool {
+        fn go(world: &mut WorldData, arrow_info: ArrowInfo, (x, y): (usize, usize)) -> bool {
             match (world.statics[y][x], world.mobiles[y][x]) {
                 (Some(Wall), _) => false,
                 (Some(Gate), _) => false,
                 (_, Some(Fiend { mut info })) => {
-                    info.health = info.health.saturating_sub(arrow_info.damage_factor);
+                    info.health = info.health.saturating_sub(arrow_info.damage_factor); // why doesn't this line suffice?
+                    world.mobiles[y][x] = Some(Fiend{info:info});
                     false
                 }
                 (_, Some(_)) => false,
