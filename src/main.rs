@@ -14,8 +14,6 @@ use model::*;
 
 use pancurses::*;
 
-use rand::{Rng, thread_rng};
-
 use fiends::make_wave;
 
 fn initial_world() -> WorldData {
