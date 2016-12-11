@@ -235,11 +235,12 @@ impl WorldData {
                 });
                 return;
             }
-            Some(Turret { mut info }) => {
+            Some(Turret { mut info }) if info.health > 0 => {
                 info.health = info.health.saturating_sub(fiend_info.damage_factor);
                 self.statics[new_y][new_x] = Some(Turret { info: info });
                 return;
             }
+            Some(Turret { .. }) => {} // a broken turret can be bypassed
             None => {} // we can move into an empty space
         };
         match self.mobiles[new_y][new_x] {
