@@ -5,7 +5,7 @@ pub const X: usize = 63;
 pub const Y: usize = 31;
 
 pub use self::Static::*;
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Static {
     Wall,
     Gate,
@@ -14,7 +14,7 @@ pub enum Static {
     Obstacle { health: usize, max_health: usize },
 }
 
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct TurretInfo {
     pub form: (),
     pub cooldown: usize,
@@ -26,7 +26,7 @@ pub struct TurretInfo {
 }
 
 pub use self::Mobile::*;
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Mobile {
     Player,
     Fiend { info: FiendInfo },
@@ -42,7 +42,7 @@ impl Mobile {
     }
 }
 
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct PlayerInfo {
     pub location: (usize, usize),
     pub health: usize,
@@ -52,7 +52,7 @@ pub struct PlayerInfo {
     pub armour_factor: usize,
 }
 
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct FiendName {
     pub prefix: Option<&'static str>,
     pub name: &'static str,
@@ -69,7 +69,7 @@ impl fmt::Display for FiendName {
     }
 }
 
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct FiendInfo {
     pub ch: char,
     pub name: FiendName,
@@ -84,7 +84,7 @@ pub struct FiendInfo {
     pub obstacle_target_distance: usize,
 }
 
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct ArrowInfo {
     pub dx: usize,
     pub dy: usize,
