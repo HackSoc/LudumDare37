@@ -22,6 +22,7 @@ impl WorldData {
                     (Some(Gate), _) => false,
                     (_, Some(Fiend { mut info })) => {
                         info.health = info.health.saturating_sub(arrow_info.damage_factor);
+                        self.shoot(info, arrow_info.damage_factor);
                         self.mobiles[y][x] = Some(Fiend { info: info });
                         false
                     }
@@ -88,6 +89,20 @@ impl WorldData {
 
         self.arrows.insert((x, y));
         self.mobiles[y][x] = arrow;
+    }
+
+    fn shoot(&mut self, info: FiendInfo, damage_factor: usize) {
+        if info.health == 0 {
+            self.log_msg(format!("{} is shot for {} damage! (dead!)",
+                                 info.name,
+                                 damage_factor));
+        } else {
+            self.log_msg(format!("{} is shot for {} damage! ({} / {})",
+                                 info.name,
+                                 damage_factor,
+                                 info.health,
+                                 info.max_health));
+        }
     }
 }
 

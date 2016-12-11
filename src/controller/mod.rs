@@ -310,7 +310,9 @@ impl WorldData {
         match self.mobiles[new_y][new_x] {
             Some(Arrow { .. }) => return,
             Some(Fiend { mut info }) => {
-                info.health = info.health.saturating_sub(self.player_info.damage_factor);
+                let damage_factor = self.player_info.damage_factor;
+                info.health = info.health.saturating_sub(damage_factor);
+                self.attack(info, damage_factor);
                 self.mobiles[new_y][new_x] = Some(Fiend { info: info });
                 return;
             }
@@ -321,6 +323,18 @@ impl WorldData {
         self.mobiles[old_y][old_x] = None;
         self.mobiles[new_y][new_x] = Some(Player);
         assert!(self.mobiles[new_y][new_x].map_or(false, |p| p.is_player()));
+    }
+
+    fn attack(&mut self, info: FiendInfo, damage_factor: usize) {
+        if info.health == 0 {
+            self.log_msg(format!("{} is hit for {} damage! (dead!)", info.name, damage_factor));
+        } else {
+            self.log_msg(format!("{} is hit for {} damage! ({} / {})",
+                                 info.name,
+                                 damage_factor,
+                                 info.health,
+                                 info.max_health));
+        }
     }
 }
 
@@ -346,10 +360,20 @@ fn spawn_fiends(world_data: &mut WorldData, to_spawn: &mut Vec<FiendInfo>) {
                 break;
             }
             let spawn_i = thread_rng().gen_range(0, to_spawn.len());
+            let fiend = to_spawn[spawn_i];
             world_data.fiends.insert(*gate);
-            world_data.mobiles[gate.1][gate.0] = Some(Fiend { info: to_spawn[spawn_i] });
+            world_data.mobiles[gate.1][gate.0] = Some(Fiend { info: fiend });
             to_spawn.swap_remove(spawn_i);
             free_gates.remove(gate);
+
+            // Have to inline this, rather than use
+            // 'world_data.log_msg' because it needs a mutable borrow
+            // and 'world_data.gates' is borrowed immutably.
+            let len = world_data.log.len();
+            for i in 1..len {
+                world_data.log[len - i] = world_data.log[len - i - 1].clone();
+            }
+            world_data.log[0] = format!("A {} appears!", fiend.name);
         }
     }
 }

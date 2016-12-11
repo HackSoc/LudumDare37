@@ -37,21 +37,26 @@ impl WorldData {
         match self.statics[new_y][new_x] {
             Some(Wall) => return,
             Some(Obstacle { health, max_health }) => {
+                let new_health = health.saturating_sub(fiend_info.damage_factor);
                 self.statics[new_y][new_x] = Some(Obstacle {
-                    health: health.saturating_sub(fiend_info.damage_factor),
+                    health: new_health,
                     max_health: max_health,
                 });
+                self.fiend_hit("an obstacle", fiend_info, new_health, max_health);
                 return;
             }
             Some(Goal { health, max_health }) => {
+                let new_health = health.saturating_sub(fiend_info.damage_factor);
                 self.statics[new_y][new_x] = Some(Goal {
-                    health: health.saturating_sub(fiend_info.damage_factor),
+                    health: new_health,
                     max_health: max_health,
                 });
+                self.fiend_hit("the Yendow", fiend_info, new_health, max_health);
                 return;
             }
             Some(Turret { mut info }) if info.health > 0 => {
                 info.health = info.health.saturating_sub(fiend_info.damage_factor);
+                self.fiend_hit("a turret", fiend_info, info.health, info.max_health);
                 self.statics[new_y][new_x] = Some(Turret { info: info });
                 return;
             }
@@ -63,6 +68,11 @@ impl WorldData {
             Some(Player) => {
                 self.player_info.health =
                     self.player_info.health.saturating_sub(fiend_info.damage_factor);
+                let player_info = self.player_info;
+                self.fiend_hit("you",
+                               fiend_info,
+                               player_info.health,
+                               player_info.max_health);
                 return;
             }
             None => {} // we can move into an empty space
@@ -95,6 +105,26 @@ impl WorldData {
         };
         let path = astar(&mut searcher);
         *path.expect("No path found!").get(1).expect("No path found!")
+    }
+
+    fn fiend_hit(&mut self,
+                 target: &str,
+                 fiend_info: FiendInfo,
+                 health: usize,
+                 max_health: usize) {
+        if health == 0 {
+            self.log_msg(format!("{} hits {} for {} damage! (destroyed!)",
+                                 fiend_info.name,
+                                 target,
+                                 fiend_info.damage_factor));
+        } else {
+            self.log_msg(format!("{} hits {} for {} damage! ({} / {})",
+                                 fiend_info.name,
+                                 target,
+                                 fiend_info.damage_factor,
+                                 health,
+                                 max_health));
+        }
     }
 }
 

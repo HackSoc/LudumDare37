@@ -129,6 +129,17 @@ pub struct WorldData {
     pub menu: Menu,
     pub menu_index: usize,
     pub placement: Option<Static>,
+    pub log: [String; 5],
+}
+
+impl WorldData {
+    pub fn log_msg(&mut self, msg: String) {
+        let len = self.log.len();
+        for i in 1..len {
+            self.log[len - i] = self.log[len - i - 1].clone();
+        }
+        self.log[0] = msg;
+    }
 }
 
 pub use self::GameState::*;

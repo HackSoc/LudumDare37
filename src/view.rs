@@ -142,6 +142,11 @@ impl WorldData {
         windows.help.mvaddstr(1, 1, "THING PROTECTOR");
         windows.help.refresh();
 
+        windows.log.clear();
+        windows.log.draw_box(0, 0);
+        for i in 0..self.log.len() {
+            windows.log.mvaddstr(i as i32 + 1, 1, self.log[i].as_str());
+        }
         windows.log.refresh();
     }
 
