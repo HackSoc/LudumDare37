@@ -4,6 +4,7 @@ mod controller;
 mod model;
 mod view;
 mod enemies;
+mod util;
 
 use std::collections::BTreeSet;
 
