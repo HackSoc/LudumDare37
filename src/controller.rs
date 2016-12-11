@@ -303,7 +303,7 @@ impl WorldData {
 
         // Move the arrow one space at a time, terminating if it hits something.
         if arrow_info.dx == 0 {
-            for d in 0..arrow_info.dy.abs() {
+            for _ in 0..arrow_info.dy.abs() {
                 y = if arrow_info.dy > 0 { y + 1 } else { y - 1 };
                 if !go(self, arrow_info, (old_x, y)) {
                     return;
