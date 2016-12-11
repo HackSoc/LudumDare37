@@ -54,6 +54,7 @@ pub struct FiendInfo {
     pub ch: char,
     pub form: (),
     pub health: u8,
+    pub max_health: u8,
     pub damage_factor: u8,
     pub armour_factor: u8,
     pub player_target_distance: u8,

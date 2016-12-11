@@ -6,6 +6,7 @@ pub fn kobold() -> Mobile {
             ch: 'k',
             form: (),
             health: 15,
+            max_health: 15,
             damage_factor: 3,
             armour_factor: 0,
             player_target_distance: 25,
