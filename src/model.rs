@@ -81,4 +81,5 @@ pub struct WorldData {
     pub fiends: BTreeSet<(usize, usize)>,
     pub turrets: BTreeSet<(usize, usize)>,
     pub arrows: BTreeSet<(usize, usize)>,
+    pub obstacles: BTreeSet<(usize, usize)>,
 }

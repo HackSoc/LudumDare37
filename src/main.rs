@@ -18,6 +18,7 @@ fn initial_world() -> WorldData {
         fiends: BTreeSet::new(),
         arrows: BTreeSet::new(),
         turrets: BTreeSet::new(),
+        obstacles: BTreeSet::new(),
         player_info: PlayerInfo {
             location: (20, 20),
             health: 100,

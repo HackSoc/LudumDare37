@@ -88,6 +88,7 @@ impl GameState {
         };
 
         if do_next {
+            // step fiends, turrets, and arrows.
             for fiend_xy in &world_data.fiends.clone() {
                 match world_data.mobiles[fiend_xy.1][fiend_xy.0] {
                     Some(Fiend { info }) => world_data.step_fiend(*fiend_xy, info),
@@ -124,7 +125,7 @@ impl GameState {
                 }
             }
 
-            // clean up dead mobs.
+            // clean up dead mobs and obstacles.
             for fiend_xy in &world_data.fiends.clone() {
                 match world_data.mobiles[fiend_xy.1][fiend_xy.0] {
                     Some(Fiend { info }) if info.health == 0 => {
@@ -137,6 +138,22 @@ impl GameState {
                                fiend_xy.0,
                                fiend_xy.1,
                                mob)
+                    }
+                }
+            }
+
+            for obstacle_xy in &world_data.obstacles.clone() {
+                match world_data.statics[obstacle_xy.1][obstacle_xy.0] {
+                    Some(Obstacle { health, .. }) if health == 0 => {
+                        world_data.statics[obstacle_xy.1][obstacle_xy.0] = None;
+                        world_data.obstacles.remove(obstacle_xy);
+                    }
+                    Some(Obstacle { .. }) => {}
+                    stat => {
+                        panic!("({}, {}) is not an obstacle (got {:?})!",
+                               obstacle_xy.0,
+                               obstacle_xy.1,
+                               stat)
                     }
                 }
             }
