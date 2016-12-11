@@ -61,18 +61,6 @@ impl Static {
     }
 }
 
-impl Mobile {
-    fn fiend_interact(&mut self, fiend_info: &FiendInfo, player_info: &mut PlayerInfo) {
-        match *self {
-            Arrow { .. } => {}
-            Fiend { .. } => {}
-            Player => {
-                player_info.health = player_info.health.saturating_sub(fiend_info.damage_factor)
-            }
-        };
-    }
-}
-
 impl GameState {
     pub fn handle(&mut self, world_data: &mut WorldData, i: Input) {
         match *self {
@@ -241,9 +229,11 @@ impl WorldData {
             None => {} // we can move into an empty space
         };
         match self.mobiles[new_y][new_x] {
-            Some(mut mob) => {
-                mob.fiend_interact(&fiend_info, &mut self.player_info);
-                return;
+            Some(Arrow { .. }) => return, // TODO: be damaged
+            Some(Fiend { .. }) => return, // TODO: try moving elsewhere
+            Some(Player) => {
+                self.player_info.health = self.player_info.health.saturating_sub(fiend_info.damage_factor);
+                return
             }
             None => {} // we can move into an empty space
         }
