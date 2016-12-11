@@ -14,6 +14,8 @@ use model::*;
 
 use pancurses::*;
 
+use rand::{Rng, thread_rng};
+
 fn initial_world() -> WorldData {
     let mut world_data = WorldData {
         statics: [[None; X]; Y],
@@ -78,12 +80,12 @@ fn initial_world() -> WorldData {
     world_data.turrets.insert((X / 2 + 1, Y / 2));
 
     // Some example enemies.
-    world_data.mobiles[Y - 1][1 + (X / 2) - 3] = fiends::make_fiend(15);
-    world_data.mobiles[Y - 3][3 + (X / 2) - 3] = fiends::make_fiend(15);
-    world_data.mobiles[Y - 1][5 + (X / 2) - 3] = fiends::make_fiend(15);
-    world_data.fiends.insert((1 + (X / 2) - 3, Y - 1));
-    world_data.fiends.insert((3 + (X / 2) - 3, Y - 3));
-    world_data.fiends.insert((5 + (X / 2) - 3, Y - 1));
+    let wave = fiends::make_wave(1);
+    for fiend in wave {
+        let x = thread_rng().gen_range(1, 6) + (X / 2) - 3;
+        world_data.mobiles[Y - 1][x] = Some(Fiend { info: fiend });
+        world_data.fiends.insert((x, Y - 1));
+    }
 
     return world_data;
 }
