@@ -60,7 +60,7 @@ impl WorldData {
         }
         let stat_string = format!(
             "Health: {:3} | \
-             Yendow Integrity: {:3} | \
+             Thing Integrity: {:3} | \
              Wave: {:3}",
             self.player_info.health,
             match self.statics[Y/2][X/2] {
@@ -70,11 +70,14 @@ impl WorldData {
             1);
 
         let offset = (X-stat_string.len()) as i32/2;
-
         windows.stats.mvaddstr(2, offset, stat_string.as_str());
         windows.stats.refresh();
+
         windows.view.refresh();
+
+        windows.help.mvaddstr(1,1,"THING PROTECTOR");
         windows.help.refresh();
+
         windows.log.refresh();
     }
 
