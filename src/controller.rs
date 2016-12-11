@@ -88,54 +88,55 @@ impl GameState {
         };
 
         if do_next {
-            // find all fiends, turrets, and arrows (todo: just have
-            // these in a list directly, rather than the current
-            // matrix form?)
-            let mut fiends = LinkedList::new();
-            let mut turrets = LinkedList::new();
-            let mut arrows = LinkedList::new();
-            for x in 0..X {
-                for y in 0..Y {
-                    if let Some(Fiend { .. }) = world_data.mobiles[y][x] {
-                        fiends.push_back((x, y))
-                    }
-                    if let Some(Turret { .. }) = world_data.statics[y][x] {
-                        turrets.push_back((x, y))
-                    }
-                    if let Some(Arrow { .. }) = world_data.mobiles[y][x] {
-                        arrows.push_back((x, y))
-                    }
-                }
-            }
-
-            // step everything.
-            for fiend_xy in fiends.iter_mut() {
+            for fiend_xy in &world_data.fiends.clone() {
                 match world_data.mobiles[fiend_xy.1][fiend_xy.0] {
                     Some(Fiend { info }) => world_data.step_fiend(*fiend_xy, info),
-                    _ => {}
+                    mob => {
+                        panic!("({}, {}) is not a fiend (got {:?})!",
+                               fiend_xy.0,
+                               fiend_xy.1,
+                               mob)
+                    }
                 }
             }
 
-            for turret_xy in turrets.iter_mut() {
+            for turret_xy in &world_data.turrets.clone() {
                 match world_data.statics[turret_xy.1][turret_xy.0] {
                     Some(Turret { info }) => world_data.step_turret(*turret_xy, info),
-                    _ => {}
+                    stat => {
+                        panic!("({}, {}) is not a turret (got {:?})!",
+                               turret_xy.0,
+                               turret_xy.1,
+                               stat)
+                    }
                 }
             }
 
-            for arrow_xy in arrows.iter_mut() {
+            for arrow_xy in &world_data.arrows.clone() {
                 match world_data.mobiles[arrow_xy.1][arrow_xy.0] {
                     Some(Arrow { info }) => world_data.step_arrow(*arrow_xy, info),
-                    _ => {}
+                    mob => {
+                        panic!("({}, {}) is not an arrow (got {:?})!",
+                               arrow_xy.0,
+                               arrow_xy.1,
+                               mob)
+                    }
                 }
             }
 
             // clean up dead mobs.
-            for x in 0..X {
-                for y in 0..Y {
-                    match world_data.mobiles[y][x] {
-                        Some(Fiend { info }) if info.health == 0 => world_data.mobiles[y][x] = None,
-                        _ => {}
+            for fiend_xy in &world_data.fiends.clone() {
+                match world_data.mobiles[fiend_xy.1][fiend_xy.0] {
+                    Some(Fiend { info }) if info.health == 0 => {
+                        world_data.mobiles[fiend_xy.1][fiend_xy.0] = None;
+                        world_data.fiends.remove(fiend_xy);
+                    }
+                    Some(Fiend { .. }) => {}
+                    mob => {
+                        panic!("({}, {}) is not a fiend (got {:?})!",
+                               fiend_xy.0,
+                               fiend_xy.1,
+                               mob)
                     }
                 }
             }
@@ -169,6 +170,7 @@ impl WorldData {
             Some(Fiend { mut info }) => {
                 info.health = info.health.saturating_sub(self.player_info.damage_factor);
                 self.mobiles[new_y][new_x] = Some(Fiend { info: info });
+                return;
             }
             Some(Player) => panic!("Player walked into themself"),
             None => {} // we can move into an empty space
@@ -254,6 +256,8 @@ impl WorldData {
             }
             None => {} // we can move into an empty space
         }
+        self.fiends.remove(&(old_x, old_y));
+        self.fiends.insert((new_x, new_y));
         self.mobiles[old_y][old_x] = None;
         self.mobiles[new_y][new_x] = Some(Fiend { info: fiend_info });
     }
@@ -286,6 +290,7 @@ impl WorldData {
                             damage_factor: 300,
                         },
                     };
+                    self.arrows.insert((x, y));
                     self.mobiles[y][x] = Some(arrow);
                     new_turret_info.cooldown = turret_info.max_cooldown;
                 }
@@ -303,6 +308,7 @@ impl WorldData {
         let mut y = old_y;
 
         self.mobiles[y][x] = None;
+        self.arrows.remove(&(x, y));
 
         // Would be nice to avoid this extra scope...
         {
@@ -380,6 +386,7 @@ impl WorldData {
             }
         }
 
+        self.arrows.insert((x, y));
         self.mobiles[y][x] = arrow;
     }
 

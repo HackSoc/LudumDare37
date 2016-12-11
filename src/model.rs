@@ -1,3 +1,5 @@
+use std::collections::BTreeSet;
+
 pub const X: usize = 63;
 pub const Y: usize = 31;
 
@@ -76,4 +78,7 @@ pub struct WorldData {
     pub statics: [[Option<Static>; X]; Y],
     pub mobiles: [[Option<Mobile>; X]; Y],
     pub player_info: PlayerInfo,
+    pub fiends: BTreeSet<(usize, usize)>,
+    pub turrets: BTreeSet<(usize, usize)>,
+    pub arrows: BTreeSet<(usize, usize)>,
 }

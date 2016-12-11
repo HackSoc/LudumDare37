@@ -5,6 +5,8 @@ mod model;
 mod view;
 mod enemies;
 
+use std::collections::BTreeSet;
+
 use model::*;
 
 use pancurses::*;
@@ -13,6 +15,9 @@ fn initial_world() -> WorldData {
     let mut world_data = WorldData {
         statics: [[None; X]; Y],
         mobiles: [[None; X]; Y],
+        fiends: BTreeSet::new(),
+        arrows: BTreeSet::new(),
+        turrets: BTreeSet::new(),
         player_info: PlayerInfo {
             location: (20, 20),
             health: 100,
@@ -62,11 +67,16 @@ fn initial_world() -> WorldData {
     };
     world_data.statics[Y / 2][X / 2 - 1] = Some(Turret { info: turret_info });
     world_data.statics[Y / 2][X / 2 + 1] = Some(Turret { info: turret_info });
+    world_data.turrets.insert((X / 2 - 1, Y / 2));
+    world_data.turrets.insert((X / 2 + 1, Y / 2));
 
     // Some example enemies.
     world_data.mobiles[Y - 1][1 + (X / 2) - 3] = Some(enemies::kobold());
     world_data.mobiles[Y - 3][3 + (X / 2) - 3] = Some(enemies::kobold());
     world_data.mobiles[Y - 1][5 + (X / 2) - 3] = Some(enemies::kobold());
+    world_data.fiends.insert((1 + (X / 2) - 3, Y - 1));
+    world_data.fiends.insert((3 + (X / 2) - 3, Y - 3));
+    world_data.fiends.insert((5 + (X / 2) - 3, Y - 1));
 
     return world_data;
 }
