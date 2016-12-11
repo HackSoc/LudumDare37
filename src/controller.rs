@@ -6,6 +6,19 @@ use pancurses::Input::*;
 use std::cmp::{min, max};
 use std::collections::LinkedList;
 
+// I felt like making this a macro
+macro_rules! signed_add {
+    ($u:expr, $s:expr, $t:ty) => {{
+        let u = $u;
+        let s = $s;
+        if s < 0 {
+            u.saturating_sub(s.abs() as $t)
+        } else {
+            u.saturating_add(s.abs() as $t)
+        }
+    }}
+}
+
 #[derive(PartialEq, Eq)]
 pub enum GameState {
     Startup,
@@ -259,14 +272,18 @@ impl WorldData {
             match self.find_fiend(xy) {
                 Some(fiend_xy) if distance(xy, fiend_xy) <= turret_info.range as f64 => {
                     let (fiend_x, fiend_y) = fiend_xy;
-                    let dx = fiend_x as f64 - x as f64;
-                    let dy = fiend_y as f64 - y as f64;
-                    let magnitude = (dx * dx + dy * dy).sqrt();
+                    let (dx, incx) = make_delta(x, fiend_x);
+                    let (dy, incy) = make_delta(y, fiend_y);
+                    let magnitude = (dx as f64 * dx as f64 + dy as f64 * dy as f64).sqrt();
                     let arrow = Arrow {
                         info: ArrowInfo {
-                            dx: (dx / magnitude * turret_info.arrow_speed as f64).trunc() as i8,
-                            dy: (dy / magnitude * turret_info.arrow_speed as f64).trunc() as i8,
-                            damage_factor: 3,
+                            dx: (dx as f64 / magnitude * turret_info.arrow_speed as f64)
+                                .trunc() as u8,
+                            dy: (dy as f64 / magnitude * turret_info.arrow_speed as f64)
+                                .trunc() as u8,
+                            incx: incx,
+                            incy: incy,
+                            damage_factor: 300,
                         },
                     };
                     self.mobiles[y][x] = Some(arrow);
@@ -300,25 +317,46 @@ impl WorldData {
 
         let mut x = old_x;
         let mut y = old_y;
-
-        // Move the arrow one space at a time, terminating if it hits something.
         if arrow_info.dx == 0 {
-            for _ in 0..arrow_info.dy.abs() {
-                y = if arrow_info.dy > 0 { y + 1 } else { y - 1 };
-                if !go(self, arrow_info, (old_x, y)) {
+            for _ in 0..arrow_info.dy {
+                y = if arrow_info.incy { y + 1 } else { y - 1 };
+                if !go(self, arrow_info, (x, y)) {
+                    return;
+                }
+            }
+        } else if arrow_info.dy == 0 {
+            for _ in 0..arrow_info.dx {
+                x = if arrow_info.incx { x + 1 } else { x - 1 };
+                if !go(self, arrow_info, (x, y)) {
                     return;
                 }
             }
         } else {
-            // Bresenham's line algorithm (integer arithmetic variant, assumes dx /= 0)
-            let mut err = 2 * arrow_info.dy - arrow_info.dx;
-            for _ in 0..arrow_info.dx.abs() {
-                x = if arrow_info.dx > 0 { x + 1 } else { x - 1 };
-                if err > 0 {
-                    y += 1;
-                    err -= arrow_info.dx;
+            // Bresenham's line algorithm
+            let (counter, mut err, err_inc, err_dec, inc, correction): (u8, i32, i32, i32, (i8, i8), (i8, i8)) = if arrow_info.dx > arrow_info.dy {
+                (arrow_info.dx,
+                 arrow_info.dy as i32 * 2 - arrow_info.dx as i32,
+                 arrow_info.dy as i32 * 2,
+                 arrow_info.dx as i32 * 2,
+                 if arrow_info.incx { (1, 0) } else { (-1, 0) },
+                 if arrow_info.incy { (0, 1) } else { (0, -1) })
+            } else {
+                (arrow_info.dy,
+                 arrow_info.dx as i32 * 2 - arrow_info.dy as i32,
+                 arrow_info.dx as i32 * 2,
+                 arrow_info.dy as i32 * 2,
+                 if arrow_info.incy { (0, 1) } else { (0, -1) },
+                 if arrow_info.incx { (1, 0) } else { (-1, 0) })
+            };
+            for _ in 0..counter {
+                if err >= 0 {
+                    err -= err_dec;
+                    x = signed_add!(x, correction.0, usize);
+                    y = signed_add!(y, correction.1, usize);
                 }
-                err += arrow_info.dy;
+                err += err_inc;
+                x = signed_add!(x, inc.0, usize);
+                y = signed_add!(y, inc.1, usize);
                 if !go(self, arrow_info, (x, y)) {
                     return;
                 }
@@ -397,4 +435,12 @@ fn distance((x1, y1): (usize, usize), (x2, y2): (usize, usize)) -> f64 {
     let dx = x1 as f64 - x2 as f64;
     let dy = y1 as f64 - y2 as f64;
     return (dx * dx + dy * dy).sqrt();
+}
+
+fn make_delta(start: usize, end: usize) -> (usize, bool) {
+    if start < end {
+        (end - start, true)
+    } else {
+        (start - end, false)
+    }
 }

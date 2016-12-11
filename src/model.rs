@@ -65,8 +65,10 @@ pub struct FiendInfo {
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct ArrowInfo {
-    pub dx: i8,
-    pub dy: i8,
+    pub dx: u8,
+    pub dy: u8,
+    pub incx: bool,
+    pub incy: bool,
     pub damage_factor: u8,
 }
 
