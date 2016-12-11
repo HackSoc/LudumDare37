@@ -8,7 +8,11 @@ const MIN_POINTS: usize = 8;
 
 // Minimum point score, character, and name. Point score is to prevent
 // pitifully weak demons, for instance.
-const SPECIES: [(usize, char, &'static str); 1] = [(15, 'k', "kobold")];
+const SPECIES: [(usize, char, &'static str); 5] = [(15, 'k', "kobold"),
+                                                   (15, 'w', "waynhim"),
+                                                   (75, 'd', "demondim"),
+                                                   (100, 'v', "vile"),
+                                                   (150, 'G', "giant")];
 
 // Variants: scale the minimum point cost of a thing.
 const VARIANTS: [(f64, &'static str); 3] = [(0.5, "lesser "), (2.0, "greater "), (5.0, "ur-")];
