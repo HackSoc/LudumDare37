@@ -106,29 +106,38 @@ impl GameState {
             let mut arrows = LinkedList::new();
             for x in 0..X {
                 for y in 0..Y {
-                    if let Some(Fiend { info }) = world_data.mobiles[y][x] {
-                        fiends.push_back(((x, y), info))
+                    if let Some(Fiend { .. }) = world_data.mobiles[y][x] {
+                        fiends.push_back((x, y))
                     }
-                    if let Some(Turret { info }) = world_data.statics[y][x] {
-                        turrets.push_back(((x, y), info))
+                    if let Some(Turret { .. }) = world_data.statics[y][x] {
+                        turrets.push_back((x, y))
                     }
-                    if let Some(Arrow { info }) = world_data.mobiles[y][x] {
-                        arrows.push_back(((x, y), info))
+                    if let Some(Arrow { .. }) = world_data.mobiles[y][x] {
+                        arrows.push_back((x, y))
                     }
                 }
             }
 
             // step everything.
-            for fiend in fiends.iter_mut() {
-                world_data.step_fiend(fiend.0, fiend.1)
+            for fiend_xy in fiends.iter_mut() {
+                match world_data.mobiles[fiend_xy.1][fiend_xy.0] {
+                    Some(Fiend { info }) => world_data.step_fiend(*fiend_xy, info),
+                    _ => {}
+                }
             }
 
-            for turret in turrets.iter_mut() {
-                world_data.step_turret(turret.0, turret.1)
+            for turret_xy in turrets.iter_mut() {
+                match world_data.statics[turret_xy.1][turret_xy.0] {
+                    Some(Turret { info }) => world_data.step_turret(*turret_xy, info),
+                    _ => {}
+                }
             }
 
-            for arrow in arrows.iter_mut() {
-                world_data.step_arrow(arrow.0, arrow.1)
+            for arrow_xy in arrows.iter_mut() {
+                match world_data.mobiles[arrow_xy.1][arrow_xy.0] {
+                    Some(Arrow { info }) => world_data.step_arrow(*arrow_xy, info),
+                    _ => {}
+                }
             }
 
             // clean up dead mobs.
