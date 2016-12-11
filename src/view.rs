@@ -5,6 +5,8 @@ use pancurses::*;
 type color_pair = u32;
 const DEFAULT_COLORS: color_pair = 0;
 const GOAL_COLORS: color_pair = 1;
+const BROKEN_TURRET_COLORS: color_pair = 2;
+const DAMAGED_TURRET_COLORS: color_pair = 3;
 
 const EMPTY_CELL: chtype = ' ' as u32;
 
@@ -14,6 +16,8 @@ impl WorldData {
         use_default_colors();
         init_pair(DEFAULT_COLORS as i16, COLOR_WHITE, -1);
         init_pair(GOAL_COLORS as i16, COLOR_YELLOW, -1);
+        init_pair(BROKEN_TURRET_COLORS as i16, COLOR_RED, -1);
+        init_pair(DAMAGED_TURRET_COLORS as i16, COLOR_MAGENTA, -1);
     }
 
     pub fn render(&self, window: &Window) {
@@ -67,7 +71,16 @@ impl WorldData {
         // Apply formatting
         match stat {
             Goal { .. } => chty | COLOR_PAIR(GOAL_COLORS),
-            Turret { .. } => chty | A_BOLD,
+            Turret { info } => {
+                let colour = if info.health == 0 {
+                    BROKEN_TURRET_COLORS
+                } else if info.health <= info.max_health / 2 {
+                    DAMAGED_TURRET_COLORS
+                } else {
+                    DEFAULT_COLORS
+                };
+                chty | A_BOLD | COLOR_PAIR(colour)
+            }
             _ => chty,
         }
     }
