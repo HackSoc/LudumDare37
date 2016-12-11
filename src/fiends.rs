@@ -40,7 +40,11 @@ pub fn make_wave(wave: usize) -> Vec<FiendInfo> {
     for i in 0..fiend_types {
         // Allocate points for this type.
         let max_points = remaining - (fiend_types - i - 1) * MIN_POINTS;
-        let allocated = gen_range_panic(&"allocated", MIN_POINTS, 1 + max_points);
+        let allocated = if i == fiend_types - 1 {
+            remaining
+        } else {
+            gen_range_panic(&"allocated", MIN_POINTS, 1 + max_points)
+        };
         remaining -= allocated;
 
         // Determine the cost of one.
@@ -55,6 +59,7 @@ pub fn make_wave(wave: usize) -> Vec<FiendInfo> {
             fiends.push(fiend);
             my_remaining -= cost;
         }
+        remaining += my_remaining;
     }
     fiends
 }
