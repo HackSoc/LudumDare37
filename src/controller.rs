@@ -304,7 +304,7 @@ impl WorldData {
                 (Some(Wall), _) => false,
                 (Some(Gate), _) => false,
                 (_, Some(Fiend { mut info })) => {
-                    info.health = info.health.saturating_sub(arrow_info.damage_factor); // why doesn't this line suffice?
+                    info.health = info.health.saturating_sub(arrow_info.damage_factor);
                     world.mobiles[y][x] = Some(Fiend{info:info});
                     false
                 }
