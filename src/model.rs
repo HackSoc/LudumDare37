@@ -1,4 +1,5 @@
 use std::collections::BTreeSet;
+use std::fmt;
 
 pub const X: usize = 63;
 pub const Y: usize = 31;
@@ -52,8 +53,26 @@ pub struct PlayerInfo {
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
+pub struct FiendName {
+    pub prefix: Option<&'static str>,
+    pub name: &'static str,
+    pub suffix: Option<&'static str>,
+}
+
+impl fmt::Display for FiendName {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f,
+               "{}{}{}",
+               self.prefix.unwrap_or(""),
+               self.name,
+               self.suffix.unwrap_or(""))
+    }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub struct FiendInfo {
     pub ch: char,
+    pub name: FiendName,
     pub form: (),
     pub health: usize,
     pub max_health: usize,
