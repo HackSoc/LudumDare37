@@ -9,6 +9,7 @@ mod fiends;
 mod util;
 
 use std::collections::BTreeSet;
+use std::env;
 
 use model::*;
 
@@ -74,6 +75,40 @@ fn initial_world() -> WorldData {
 }
 
 fn main() {
+    if env::args().nth(1) == Some("name_gen".to_string()) {
+        name_gen()
+    } else {
+        play()
+    }
+}
+
+fn name_gen() {
+    for wave in 1..101 {
+        let the_fiends = fiends::make_wave(wave);
+        let mut the_names = BTreeSet::new();
+        for fiend in the_fiends {
+            the_names.insert(fiend.name);
+        }
+        let mut names = "".to_string();
+        let mut i = 0;
+        for name in &the_names {
+            i += 1;
+            names = format!("{} {}{}",
+                            names,
+                            name,
+                            if i == the_names.len() { "" } else { "," });
+        }
+        if wave % 10 == 0 {
+            println!("Wave {}:{} [BIG BOSS]", wave, names);
+        } else if wave % 5 == 0 {
+            println!("Wave {}:{} [BOSS]", wave, names);
+        } else {
+            println!("Wave {}:{}", wave, names);
+        }
+    }
+}
+
+fn play() {
     let window = initscr();
     let _ = noecho();
     let _ = curs_set(0);
