@@ -2,10 +2,9 @@ use model::*;
 
 impl WorldData {
     pub fn step_arrow(&mut self, (old_x, old_y): (usize, usize), arrow_info: ArrowInfo) {
-        let arrow = self.mobiles[old_y][old_x];
-
         let mut x = old_x;
         let mut y = old_y;
+        let mut info = arrow_info;
 
         self.mobiles[y][x] = None;
         self.arrows.remove(&(x, y));
@@ -31,20 +30,21 @@ impl WorldData {
                 }
             };
 
-            let dx = arrow_info.dx;
-            let dy = arrow_info.dy;
-            let incx = arrow_info.incx;
-            let incy = arrow_info.incy;
+            let dx = info.dx;
+            let dy = info.dy;
+            let incx = info.incx;
+            let incy = info.incy;
+            let speed = info.speed;
 
             if dx == 0 {
-                for _ in 0..dy {
+                for _ in 0..speed {
                     y = if incy { y + 1 } else { y - 1 };
                     if !go((x, y)) {
                         return;
                     }
                 }
             } else if dy == 0 {
-                for _ in 0..dx {
+                for _ in 0..speed {
                     x = if incx { x + 1 } else { x - 1 };
                     if !go((x, y)) {
                         return;
@@ -53,12 +53,6 @@ impl WorldData {
             } else {
                 // Bresenham's line algorithm
                 let gdx = dx > dy;
-                let counter = if gdx { dx } else { dy };
-                let mut err: i32 = if gdx {
-                    dy as i32 * 2 - dx as i32
-                } else {
-                    dx as i32 * 2 - dy as i32
-                };
                 let err_inc: i32 = if gdx { dy as i32 * 2 } else { dx as i32 * 2 };
                 let err_dec: i32 = if gdx { dx as i32 * 2 } else { dy as i32 * 2 };
                 let inc: (i8, i8) = if gdx {
@@ -71,13 +65,13 @@ impl WorldData {
                 } else {
                     if incx { (1, 0) } else { (-1, 0) }
                 };
-                for _ in 0..counter {
-                    if err >= 0 {
-                        err -= err_dec;
+                for _ in 0..speed {
+                    if info.err >= 0 {
+                        info.err -= err_dec;
                         x = signed_add(x, correction.0);
                         y = signed_add(y, correction.1);
                     }
-                    err += err_inc;
+                    info.err += err_inc;
                     x = signed_add(x, inc.0);
                     y = signed_add(y, inc.1);
                     if !go((x, y)) {
@@ -88,7 +82,7 @@ impl WorldData {
         }
 
         self.arrows.insert((x, y));
-        self.mobiles[y][x] = arrow;
+        self.mobiles[y][x] = Some(Arrow { info: info });
     }
 
     fn shoot(&mut self, info: FiendInfo, damage_factor: usize) {

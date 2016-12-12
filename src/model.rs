@@ -92,6 +92,8 @@ pub struct ArrowInfo {
     pub dy: usize,
     pub incx: bool,
     pub incy: bool,
+    pub err: i32,
+    pub speed: usize,
     pub damage_factor: usize,
 }
 

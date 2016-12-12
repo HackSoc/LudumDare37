@@ -25,12 +25,16 @@ impl WorldData {
                     let magnitude = (dx as f64 * dx as f64 + dy as f64 * dy as f64).sqrt();
                     let arrow = Arrow {
                         info: ArrowInfo {
-                            dx: (dx as f64 / magnitude * turret_info.arrow_speed as f64)
-                                .trunc() as usize,
-                            dy: (dy as f64 / magnitude * turret_info.arrow_speed as f64)
-                                .trunc() as usize,
+                            dx: dx,
+                            dy: dy,
                             incx: incx,
                             incy: incy,
+                            err: if dx > dy {
+                                dy as i32 * 2 - dx as i32
+                            } else {
+                                dx as i32 * 2 - dy as i32
+                            },
+                            speed: turret_info.arrow_speed,
                             damage_factor: turret_info.damage_factor,
                         },
                     };
