@@ -293,6 +293,7 @@ impl GameState {
 
         // Check for phase end
         if world_data.fiends.is_empty() {
+            world_data.start_construct();
             *self = Construct;
         }
     }
@@ -362,6 +363,37 @@ impl WorldData {
                                  info.health,
                                  info.max_health));
         }
+    }
+
+    fn start_construct(&mut self) {
+        // Delete all arrows
+        for &(x, y) in &self.arrows {
+            self.mobiles[y][x] = None;
+        }
+        self.arrows = BTreeSet::new();
+
+        // Heal turrets, obstacles, and player.
+        for &(x, y) in &self.turrets {
+            match self.statics[y][x] {
+                Some(Turret { mut info }) => {
+                    info.health = info.max_health;
+                    self.statics[y][x] = Some(Turret { info: info });
+                }
+                _ => panic!("Not a turret!"),
+            }
+        }
+        for &(x, y) in &self.obstacles {
+            match self.statics[y][x] {
+                Some(Obstacle { max_health, .. }) => {
+                    self.statics[y][x] = Some(Obstacle {
+                        health: max_health,
+                        max_health: max_health,
+                    });
+                }
+                _ => panic!("Not a turret!"),
+            }
+        }
+        self.player_info.health = self.player_info.max_health;
     }
 }
 
