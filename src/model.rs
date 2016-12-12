@@ -1,5 +1,6 @@
 use std::collections::BTreeSet;
 use std::fmt;
+use pancurses::chtype;
 
 pub const X: usize = 63;
 pub const Y: usize = 31;
@@ -72,7 +73,7 @@ impl fmt::Display for FiendName {
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct FiendInfo {
-    pub ch: char,
+    pub ch: chtype,
     pub name: FiendName,
     pub form: (),
     pub health: usize,

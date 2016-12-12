@@ -177,10 +177,10 @@ impl WorldData {
 
     pub fn render_mobile(&self, mob: Mobile) -> chtype {
         match mob {
-                Player => '@',
-                Fiend { info } => info.ch,
-                Arrow { info: ArrowInfo { dx, dy, incx, incy, .. } } => {
-                    if (dx as f64) < 0.3 * dy as f64 {
+            Player => '@'.to_chtype(),
+            Fiend { info } => info.ch,
+            Arrow { info: ArrowInfo { dx, dy, incx, incy, .. } } => {
+                if (dx as f64) < 0.3 * dy as f64 {
                         '|'
                     } else if (dy as f64) < 0.3 * dx as f64 {
                         '-'
@@ -189,9 +189,9 @@ impl WorldData {
                     } else {
                         '/'
                     }
-                }
+                    .to_chtype()
             }
-            .to_chtype()
+        }
     }
 
     pub fn render_static(&self, row_n: usize, stat: Static) -> chtype {
