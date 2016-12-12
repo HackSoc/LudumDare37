@@ -111,7 +111,6 @@ impl GameState {
                     _ => {}
                 }
             }
-            Menu::Move2(_, _) => {}
             Menu::Move(depth) => {
                 let y = Y+5+7-5-1;
                 match i {
@@ -433,9 +432,7 @@ impl WorldData {
             Menu::Build => 3,
             Menu::Move(_) => 1 + self.turrets.len() + self.obstacles.len(),
             Menu::Upgrade => 1 + self.turrets.len(),
-            Menu::Continue => 0,
             Menu::Place(_, _) => 0,
-            Menu::Move2(_, _) => 0,
         }
     }
 

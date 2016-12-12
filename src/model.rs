@@ -113,9 +113,7 @@ pub enum Menu {
     Build,
     Move(usize),
     Upgrade,
-    Continue,
     Place(Static, (usize, usize)),
-    Move2(Static, (usize, usize)),
 }
 
 // pub enum RootItem {
