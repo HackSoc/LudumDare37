@@ -60,14 +60,16 @@ pub fn setup_render(window: &Window) -> GameWindows {
 impl WorldData {
     pub fn render(&self, windows: &GameWindows, game_state: &GameState) {
         match *game_state {
-            Construct => self.render_construct(windows),
+            Construct { menu: menu, menu_index: menu_index } => {
+                self.render_construct(windows, menu, menu_index)
+            }
             Fight { .. } => self.render_fight(windows),
             GameOver { ref msg } => self.render_gameover(windows, msg),
             _ => unimplemented!(),
         };
     }
 
-    pub fn render_construct(&self, windows: &GameWindows) {
+    pub fn render_construct(&self, windows: &GameWindows, menu: Menu, menu_index: usize) {
         windows.help.erase();
         windows.help.draw_box(0, 0);
         windows.help.mvaddstr(1, 1, "THING PROTECTOR");
@@ -79,21 +81,21 @@ impl WorldData {
             }
         }
 
-        match self.menu {
+        match menu {
             Menu::Root => {
                 windows.help.mvaddstr(3, 3, "Build");
                 windows.help.mvaddstr(4, 3, "Move");
                 windows.help.mvaddstr(5, 3, "Upgrade");
                 windows.help.mvaddstr(6, 3, "Continue");
-                windows.help.mvaddch(self.menu_index as i32 + 3, 2, '>');
-                windows.help.mvaddch(self.menu_index as i32 + 3, 13, '<');
+                windows.help.mvaddch(menu_index as i32 + 3, 2, '>');
+                windows.help.mvaddch(menu_index as i32 + 3, 13, '<');
             }
             Menu::Build => {
                 windows.help.mvaddstr(3, 3, "Turret");
                 windows.help.mvaddstr(4, 3, "Obstacle");
                 windows.help.mvaddstr(5, 3, "Back");
-                windows.help.mvaddch(self.menu_index as i32 + 3, 2, '>');
-                windows.help.mvaddch(self.menu_index as i32 + 3, 13, '<');
+                windows.help.mvaddch(menu_index as i32 + 3, 2, '>');
+                windows.help.mvaddch(menu_index as i32 + 3, 13, '<');
             }
 
             Menu::Place => {

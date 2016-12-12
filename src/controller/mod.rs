@@ -36,8 +36,13 @@ impl Static {
 impl GameState {
     pub fn handle(&mut self, world_data: &mut WorldData, i: Input) {
         match *self {
-            Startup => *self = Construct,
-            Construct => self.construct_handler(world_data, i),
+            Startup => {
+                *self = Construct {
+                    menu: Menu::Root,
+                    menu_index: 0,
+                }
+            }
+            Construct { .. } => self.construct_handler(world_data, i),
             Fight { .. } => self.fight_handler(world_data, i),
             GameOver { .. } => self.gameover_handler(i),
             End => panic!("Should have ended and didn't!"),
@@ -45,7 +50,12 @@ impl GameState {
     }
 
     fn construct_handler(&mut self, world_data: &mut WorldData, i: Input) {
-        match world_data.menu {
+        let (menu, index) = match *self {
+            Construct { menu: m, menu_index: i } => (m, i),
+            _ => unreachable!(),
+        };
+
+        match menu {
             Menu::Place => {
                 match i {
                     KeyDown | Character('s') => {
@@ -92,7 +102,10 @@ impl GameState {
                             _ => panic!("Lost placement???"),
                         };
                         world_data.placement = None;
-                        world_data.menu = Menu::Root;
+                        *self = Construct {
+                            menu: Menu::Root,
+                            menu_index: 0,
+                        }
                     }
                     _ => {}
                 }
@@ -101,43 +114,55 @@ impl GameState {
             _ => {
                 match i {
                     KeyDown | Character('s') => {
-                        world_data.menu_index += 1;
-                        world_data.menu_index %= world_data.current_menu_length();
+                        *self = Construct {
+                            menu: menu,
+                            menu_index: (index + 1) % world_data.current_menu_length(&menu),
+                        }
                     }
                     KeyUp | Character('w') => {
-                        world_data.menu_index = world_data.menu_index
-                            .checked_sub(1)
-                            .unwrap_or(world_data.current_menu_length() - 1);
+                        *self = Construct {
+                            menu: menu,
+                            menu_index: index.checked_sub(1)
+                                .unwrap_or(world_data.current_menu_length(&menu) - 1),
+                        }
                     }
-
                     Character('q') => *self = End,
                     KeyBackspace => {
-                        world_data.menu = Menu::Root;
-                        world_data.menu_index = 0;
+                        *self = Construct {
+                            menu: Menu::Root,
+                            menu_index: 0,
+                        }
                     }
                     Character(' ') | Character('\n') => {
-                        match (world_data.menu, world_data.menu_index) {
+                        match (menu, index) {
                             (Menu::Root, 0) => {
-                                world_data.menu = Menu::Build;
-                                world_data.menu_index = 0;
+                                *self = Construct {
+                                    menu: Menu::Build,
+                                    menu_index: 0,
+                                }
                             }
                             (Menu::Root, 1) => {
-                                world_data.menu = Menu::Move;
-                                world_data.menu_index = 0;
+                                *self = Construct {
+                                    menu: Menu::Move,
+                                    menu_index: 0,
+                                }
                             }
                             (Menu::Root, 2) => {
-                                world_data.menu = Menu::Upgrade;
-                                world_data.menu_index = 0;
+                                *self = Construct {
+                                    menu: Menu::Upgrade,
+                                    menu_index: 0,
+                                }
                             }
                             (Menu::Root, 3) => {
-                                world_data.menu_index = 0;
                                 world_data.wave += 1;
                                 *self = Fight { to_spawn: make_wave(world_data.wave) };
                                 world_data.player_info.location = (20, 20);
                             }
                             (Menu::Build, 0) => {
-                                world_data.menu = Menu::Place;
-                                world_data.menu_index = 0;
+                                *self = Construct {
+                                    menu: Menu::Place,
+                                    menu_index: 0,
+                                };
                                 world_data.placement = Some(Turret {
                                     info: TurretInfo {
                                         form: (),
@@ -152,18 +177,21 @@ impl GameState {
                                 });
                             }
                             (Menu::Build, 1) => {
-                                world_data.menu = Menu::Place;
-                                world_data.menu_index = 0;
+                                *self = Construct {
+                                    menu: Menu::Place,
+                                    menu_index: 0,
+                                };
                                 world_data.placement = Some(Obstacle {
                                     health: 300,
                                     max_health: 300,
                                 });
                             }
                             (Menu::Build, 2) => {
-                                world_data.menu = Menu::Root;
-                                world_data.menu_index = 0
+                                *self = Construct {
+                                    menu: Menu::Root,
+                                    menu_index: 0,
+                                }
                             }
-
                             _ => unimplemented!(),
                         }
                     }
@@ -295,14 +323,17 @@ impl GameState {
         // Check for phase end
         if world_data.fiends.is_empty() {
             world_data.start_construct();
-            *self = Construct;
+            *self = Construct {
+                menu: Menu::Root,
+                menu_index: 0,
+            };
         }
     }
 }
 
 impl WorldData {
-    fn current_menu_length(&self) -> usize {
-        match self.menu {
+    fn current_menu_length(&self, menu: &Menu) -> usize {
+        match *menu {
             Menu::Root => 4,
             Menu::Build => 3,
             Menu::Move => 1 + self.turrets.len() + self.obstacles.len(),

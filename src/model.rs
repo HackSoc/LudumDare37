@@ -95,7 +95,7 @@ pub struct ArrowInfo {
     pub damage_factor: usize,
 }
 
-#[derive(Clone, Copy)]
+#[derive(PartialEq, Eq, Clone, Copy)]
 pub enum Menu {
     Root,
     Build,
@@ -129,8 +129,6 @@ pub struct WorldData {
     pub arrows: BTreeSet<(usize, usize)>,
     pub obstacles: BTreeSet<(usize, usize)>,
     pub gates: BTreeSet<(usize, usize)>,
-    pub menu: Menu,
-    pub menu_index: usize,
     pub placement: Option<Static>,
     pub log: [String; 5],
     pub cash: usize,
@@ -151,7 +149,7 @@ pub use self::GameState::*;
 #[derive(PartialEq, Eq)]
 pub enum GameState {
     Startup,
-    Construct,
+    Construct { menu: Menu, menu_index: usize },
     Fight { to_spawn: Vec<FiendInfo> },
     GameOver { msg: String },
     End,
