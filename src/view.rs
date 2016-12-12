@@ -70,7 +70,7 @@ impl WorldData {
         windows.refresh();
     }
 
-    pub fn render_frame(&self, windows: &GameWindows) {
+    fn render_frame(&self, windows: &GameWindows) {
         windows.help.erase();
         windows.help.draw_box(0, 0);
         windows.help.mvaddstr(1, 1, "THING PROTECTOR");
@@ -120,7 +120,7 @@ impl WorldData {
         }
     }
 
-    pub fn render_construct(&self, windows: &GameWindows, menu: Menu, menu_index: usize) {
+    fn render_construct(&self, windows: &GameWindows, menu: Menu, menu_index: usize) {
         match menu {
             Menu::Root => {
                 windows.help.mvaddstr(3, 3, "Build");
@@ -215,7 +215,7 @@ impl WorldData {
         }
     }
 
-    pub fn render_fight(&self, windows: &GameWindows) {
+    fn render_fight(&self, windows: &GameWindows) {
         for row_n in 0..Y {
             for col_n in 0..X {
                 match self.mobiles[row_n][col_n] {
@@ -228,7 +228,7 @@ impl WorldData {
         }
     }
 
-    pub fn render_gameover(&self, windows: &GameWindows, msg: &String) {
+    fn render_gameover(&self, windows: &GameWindows, msg: &String) {
         let x = (X - msg.len() - 2) as i32 / 2;
         let y = (Y - 3) as i32 / 2 + 5;
         let gameover = windows.view.subwin(3, msg.len() as i32 + 2, y, x).unwrap();
@@ -244,7 +244,7 @@ impl WorldData {
 }
 
 impl Mobile {
-    pub fn render(&self) -> chtype {
+    fn render(&self) -> chtype {
         match *self {
             Player => '@'.to_chtype(),
             Fiend { info } => info.ch,
@@ -265,7 +265,7 @@ impl Mobile {
 }
 
 impl Static {
-    pub fn render(&self, row_n: usize) -> chtype {
+    fn render(&self, row_n: usize) -> chtype {
         let chty = match *self {
                 Wall => '#',
                 Gate => {
