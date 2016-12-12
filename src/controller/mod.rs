@@ -463,7 +463,12 @@ fn spawn_fiends(world_data: &mut WorldData, to_spawn: &mut Vec<FiendInfo>) {
             for i in 1..len {
                 world_data.log[len - i] = world_data.log[len - i - 1].clone();
             }
-            world_data.log[0] = format!("A {} appears!", fiend.name);
+            if world_data.wave % 10 == 0 {
+                // Big bosses have proper names.
+                world_data.log[0] = format!("{} appears!", fiend.name);
+            } else {
+                world_data.log[0] = format!("A {} appears!", fiend.name);
+            }
         }
     }
 }
