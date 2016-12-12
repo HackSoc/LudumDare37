@@ -27,6 +27,7 @@ impl WorldData {
                             // Vector
                             dx: dx,
                             dy: dy,
+                            dir: (incx, incy),
                             incx: if dx > dy {
                                 if incx { 1 } else { -1 }
                             } else {

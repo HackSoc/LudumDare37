@@ -92,6 +92,7 @@ pub struct ArrowInfo {
     // Vector (absolute)
     pub dx: usize,
     pub dy: usize,
+    pub dir: (bool, bool),
     // Vector direction
     pub incx: i8, // [-1,1]
     pub incy: i8, // [-1,1]

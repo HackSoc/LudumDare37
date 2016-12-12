@@ -248,12 +248,12 @@ impl Mobile {
         match *self {
             Player => '@'.to_chtype(),
             Fiend { info } => info.ch,
-            Arrow { info: ArrowInfo { dx, dy, incx, incy, .. } } => {
+            Arrow { info: ArrowInfo { dx, dy, dir, .. } } => {
                 if (dx as f64) < 0.3 * dy as f64 {
                         '|'
                     } else if (dy as f64) < 0.3 * dx as f64 {
                         '-'
-                    } else if incx == incy {
+                    } else if dir.0 == dir.1 {
                         '\\'
                     } else {
                         '/'
