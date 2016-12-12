@@ -8,6 +8,7 @@ mod view;
 mod fiends;
 mod util;
 
+use std::collections::BTreeMap;
 use std::collections::BTreeSet;
 use std::env;
 
@@ -75,26 +76,32 @@ fn initial_world() -> WorldData {
 }
 
 fn main() {
-    if env::args().nth(1) == Some("name_gen".to_string()) {
-        name_gen()
+    if env::args().nth(1) == Some("waves".to_string()) {
+        waves()
     } else {
         play()
     }
 }
 
-fn name_gen() {
+fn waves() {
     for wave in 1..101 {
         let the_fiends = fiends::make_wave(wave);
-        let mut the_names = BTreeSet::new();
+        let mut the_names = BTreeMap::new();
         for fiend in the_fiends {
-            the_names.insert(fiend.name);
+            let zero = 0;
+            let mut how_many = 0;
+            {
+                how_many = *the_names.get(&fiend.name).unwrap_or(&zero);
+            }
+            the_names.insert(fiend.name, how_many + 1);
         }
         let mut names = "".to_string();
         let mut i = 0;
-        for name in &the_names {
+        for (name, how_many) in &the_names {
             i += 1;
-            names = format!("{} {}{}",
+            names = format!("{} {}x {}{}",
                             names,
+                            how_many,
                             name,
                             if i == the_names.len() { "" } else { "," });
         }
