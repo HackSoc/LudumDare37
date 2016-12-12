@@ -12,6 +12,7 @@ use rand::{Rng, thread_rng};
 
 use std::cmp::min;
 use std::collections::BTreeSet;
+use std::mem;
 
 enum Dir {
     N,
@@ -111,6 +112,101 @@ impl GameState {
                 }
             }
             Menu::Move2(_, _) => {}
+            Menu::Move(depth) => {
+                let y = Y+5+7-5-1;
+                match i {
+                    KeyDown | Character('s') => {
+                        if index == y {
+                            if depth + y == world_data.turrets.len() + world_data.obstacles.len() {
+                                *self = Construct {
+                                    menu: Menu::Move(0),
+                                    menu_index: 0
+                                };
+                            }
+                            else {
+                                *self = Construct {
+                                    menu: Menu::Move(depth + 1),
+                                    menu_index: index
+                                };
+                            }
+                        }
+                        else {
+                            if index + depth == world_data.turrets.len() + world_data.obstacles.len() {
+                                *self = Construct {
+                                    menu: Menu::Move(0),
+                                    menu_index: 0
+                                };
+                            }
+                            else {
+                                *self = Construct {
+                                    menu: Menu::Move(depth),
+                                    menu_index: index + 1,
+                                }
+                            }
+                        }
+                    }
+                    KeyUp | Character('w') => {
+                        if index == 0 {
+                            if depth == 0 {
+                                let height = world_data.turrets.len() + world_data.obstacles.len();
+                                if height > y {
+                                    *self = Construct {
+                                        menu: Menu::Move(world_data.turrets.len() + world_data.obstacles.len() - y),
+                                        menu_index: y
+                                    }
+                                }
+                                else {
+                                    *self = Construct {
+                                        menu: Menu::Move(0),
+                                        menu_index: height
+                                    };
+                                }
+                            }
+                            else {
+                                *self = Construct {
+                                    menu: Menu::Move(depth-1),
+                                    menu_index: 0
+                                };
+                            }
+                        }
+                        else {
+                            // index != 0
+                            *self = Construct {
+                                menu: Menu::Move(depth),
+                                menu_index: index - 1
+                            };
+                        }
+                    }
+                    Character(' ') | Character('\n') => {
+                        if depth + index == world_data.turrets.len() + world_data.obstacles.len() {
+                            *self = Construct {
+                                menu: Menu::Root,
+                                menu_index: 0
+                            }
+                        }
+                        else if depth + index < world_data.turrets.len() {
+                            let item = world_data.turrets.iter().nth(depth + index).unwrap().clone();
+                            world_data.turrets.remove(&item);
+                            let placement = mem::replace(world_data.statics.get_mut(item.1).unwrap().get_mut(item.0).unwrap(), None).unwrap();
+                            *self = Construct {
+                                menu: Menu::Place(placement, item),
+                                menu_index: 0
+                            };
+                        }
+                        else {
+                            let item = world_data.obstacles.iter().nth(depth + index - world_data.turrets.iter().len()).unwrap().clone();
+                            world_data.obstacles.remove(&item);
+                            let placement = mem::replace(world_data.statics.get_mut(item.1).unwrap().get_mut(item.0).unwrap(), None).unwrap();
+                            *self = Construct {
+                                menu: Menu::Place(placement, item),
+                                menu_index: 0
+                            };
+                        }
+
+                    }
+                    _ => {}
+                }
+            }
             _ => {
                 match i {
                     KeyDown | Character('s') => {
@@ -143,7 +239,7 @@ impl GameState {
                             }
                             (Menu::Root, 1) => {
                                 *self = Construct {
-                                    menu: Menu::Move,
+                                    menu: Menu::Move(0),
                                     menu_index: 0,
                                 }
                             }
@@ -335,7 +431,7 @@ impl WorldData {
         match *menu {
             Menu::Root => 4,
             Menu::Build => 3,
-            Menu::Move => 1 + self.turrets.len() + self.obstacles.len(),
+            Menu::Move(_) => 1 + self.turrets.len() + self.obstacles.len(),
             Menu::Upgrade => 1 + self.turrets.len(),
             Menu::Continue => 0,
             Menu::Place(_, _) => 0,

@@ -98,6 +98,54 @@ impl WorldData {
                 windows.help.mvaddch(menu_index as i32 + 3, 13, '<');
             }
 
+            Menu::Move(depth) => {
+                // we want to display Y - 2 (border) - 3 (title) rows
+                // and we have 1 + self.turrets.len() items
+                let mut turrets = self.turrets.iter().enumerate().skip(depth);
+                let nturrets = turrets.len();
+                let y = Y+5+7-5;
+                for item in turrets.take(y) {
+                    let (i, s) = item;
+                    windows.help.mvaddstr((i-depth) as i32+3, 3, format!("Turret {}", i + 1).as_str());
+                    if i - depth == menu_index {
+                        let placement = self.statics[s.1][s.0].unwrap();
+                        windows.view.mvaddch(s.1 as i32, s.0 as i32, self.render_static(1, placement) | COLOR_PAIR(PLACEMENT_COLORS));
+                    }
+                };
+                if nturrets <= depth {
+                    let mut obstacles = self.obstacles.iter().enumerate().skip(depth - nturrets);
+                    for item in obstacles.take(y) {
+                        let (i, s) = item;
+                        windows.help.mvaddstr((i-nturrets) as i32+3, 3, format!("Obstacle {}", i + 1).as_str());
+                        if i - nturrets == menu_index {
+                            let placement = self.statics[s.1][s.0].unwrap();
+                            windows.view.mvaddch(s.1 as i32, s.0 as i32, self.render_static(1, placement) | COLOR_PAIR(PLACEMENT_COLORS));
+                        }
+
+                    };
+                }
+                else if nturrets > depth + y {
+
+                } else {
+                    let mut obstacles = self.obstacles.iter().enumerate();
+                    for item in obstacles.take(depth + y - nturrets) {
+                        let (i, s) = item;
+                        windows.help.mvaddstr(i as i32 + nturrets as i32 + 3, 3, format!("Obstacle {}", i + 1).as_str());
+                        if i + nturrets == menu_index {
+                            let placement = self.statics[s.1][s.0].unwrap();
+                            windows.view.mvaddch(s.1 as i32, s.0 as i32, self.render_static(1, placement) | COLOR_PAIR(PLACEMENT_COLORS));
+                        }
+
+                    };
+                };
+                let break_point = self.turrets.len() + self.obstacles.len() - depth;
+                if break_point < y {
+                    windows.help.mvaddstr(break_point as i32 + 3, 3, "Back");
+                }
+                windows.help.mvaddch(menu_index as i32 + 3, 2, '>');
+                windows.help.mvaddch(menu_index as i32 + 3, 13, '<');
+            }
+            
             Menu::Place(placement, location) => {
                 windows.help.mvaddstr(3, 3, "Placing a");
                 windows.help.mvaddstr(4,

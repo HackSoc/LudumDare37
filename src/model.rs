@@ -111,7 +111,7 @@ pub struct ArrowInfo {
 pub enum Menu {
     Root,
     Build,
-    Move,
+    Move(usize),
     Upgrade,
     Continue,
     Place(Static, (usize, usize)),
