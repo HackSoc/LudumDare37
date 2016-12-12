@@ -101,7 +101,7 @@ impl WorldData {
             Menu::Move(depth) => {
                 // we want to display Y - 2 (border) - 3 (title) rows
                 // and we have 1 + self.turrets.len() items
-                let mut turrets = self.turrets.iter().enumerate().skip(depth);
+                let turrets = self.turrets.iter().enumerate().skip(depth);
                 let nturrets = turrets.len();
                 let y = Y + 5 + 7 - 5;
                 for item in turrets.take(y) {
@@ -118,7 +118,7 @@ impl WorldData {
                     }
                 }
                 if nturrets <= depth {
-                    let mut obstacles = self.obstacles.iter().enumerate().skip(depth - nturrets);
+                    let obstacles = self.obstacles.iter().enumerate().skip(depth - nturrets);
                     for item in obstacles.take(y) {
                         let (i, s) = item;
                         windows.help.mvaddstr((i - nturrets) as i32 + 3,
@@ -136,7 +136,7 @@ impl WorldData {
                 } else if nturrets > depth + y {
 
                 } else {
-                    let mut obstacles = self.obstacles.iter().enumerate();
+                    let obstacles = self.obstacles.iter().enumerate();
                     for item in obstacles.take(depth + y - nturrets) {
                         let (i, s) = item;
                         windows.help.mvaddstr(i as i32 + nturrets as i32 + 3,
