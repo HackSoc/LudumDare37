@@ -18,27 +18,44 @@ macro_rules! fiend {
 }
 
 // The absolute minimum cost of a fiend.
-const MIN_POINTS: usize = 8;
+const MIN_POINTS: usize = 3;
 
 // Minimum point score, character, and name. Point score is to prevent
 // pitifully weak demons, for instance.
-const SPECIES: [(usize, char, &'static str); 5] = [(15, 'k', "kobold"),
-                                                   (15, 'w', "waynhim"),
-                                                   (75, 'd', "demondim"),
-                                                   (100, 'v', "vile"),
-                                                   (150, 'G', "giant")];
-const BIGBOSS_SPECIES: [(usize, char, &'static str); 8] = [(30, 'I', "Immolator"),
-                                                           (30, 'B', "Behemoth"),
-                                                           (80, 'M', "Morgoth"),
-                                                           (80, 'K', "Kenaustin Ardenol"),
-                                                           (120, 'F', "Findail"),
-                                                           (120, 'V', "Vain"),
-                                                           (170, 'C', "Covenant"),
-                                                           (170, 'F', "Foul")];
+const SPECIES: [(usize, char, &'static str); 20] = [(5, 'r', "rat"),
+                                                    (5, 's', "slime"),
+                                                    (5, 'w', "worm"),
+                                                    (15, 'k', "kobold"),
+                                                    (15, 'g', "goblin"),
+                                                    (15, 'o', "orc"),
+                                                    (75, 'W', "werewolf"),
+                                                    (75, 'w', "waynhim"),
+                                                    (75, 'd', "demondim"),
+                                                    (100, 'v', "vile"),
+                                                    (150, 'G', "giant"),
+                                                    (150, 'T', "troll"),
+                                                    (200, 'd', "demon"),
+                                                    (200, 'a', "angel"),
+                                                    (250, 'g', "wight"),
+                                                    (300, 'g', "balrog"),
+                                                    (300, 'C', "colossus"),
+                                                    (300, 'W', "wyrm"),
+                                                    (300, 'D', "dragon"),
+                                                    (300, 'V', "wyvern")];
+const BIGBOSS_SPECIES: [(usize, char, &'static str); 10] = [(30, 'I', "Immolator"),
+                                                            (30, 'B', "Behemoth"),
+                                                            (80, 'M', "Morgoth"),
+                                                            (80, 'K', "Kenaustin Ardenol"),
+                                                            (120, 'F', "Findail"),
+                                                            (120, 'V', "Vain"),
+                                                            (170, 'C', "Covenant"),
+                                                            (170, 'F', "Foul"),
+                                                            (220, 'I', "Infelice"),
+                                                            (220, 'K', "Kastenessen")];
 
 // Variants: scale the minimum point cost of a thing.
-const VARIANTS: [(f64, &'static str); 4] =
-    [(0.5, "lesser "), (1.0, ""), (2.0, "greater "), (5.0, "ur-")];
+const VARIANTS: [(f64, &'static str); 6] =
+    [(0.5, "lesser "), (1.0, ""), (1.0, ""), (1.0, ""), (2.0, "greater "), (5.0, "ur-")];
 const BOSS_VARIANTS: [(f64, &'static str); 5] =
     [(1.0, "great "), (1.0, "potent "), (1.0, "dark "), (1.0, "mighty "), (1.0, "grim ")];
 const BIGBOSS_VARIANTS: [(f64, &'static str); 5] =
