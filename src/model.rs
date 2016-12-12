@@ -53,9 +53,9 @@ pub struct PlayerInfo {
     pub armour_factor: usize,
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct FiendName {
-    pub prefix: Option<&'static str>,
+    pub prefix: &'static str,
     pub name: &'static str,
     pub suffix: Option<&'static str>,
 }
@@ -64,7 +64,7 @@ impl fmt::Display for FiendName {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f,
                "{}{}{}",
-               self.prefix.unwrap_or(""),
+               self.prefix,
                self.name,
                self.suffix.unwrap_or(""))
     }
