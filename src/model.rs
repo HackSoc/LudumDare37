@@ -102,8 +102,8 @@ pub enum Menu {
     Move,
     Upgrade,
     Continue,
-    Place,
-    Move2,
+    Place(Static),
+    Move2(Static),
 }
 
 // pub enum RootItem {
@@ -129,7 +129,6 @@ pub struct WorldData {
     pub arrows: BTreeSet<(usize, usize)>,
     pub obstacles: BTreeSet<(usize, usize)>,
     pub gates: BTreeSet<(usize, usize)>,
-    pub placement: Option<Static>,
     pub log: [String; 5],
     pub cash: usize,
     pub wave: usize,

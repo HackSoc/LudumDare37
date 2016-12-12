@@ -31,7 +31,6 @@ fn initial_world() -> WorldData {
             heal_factor: 1,
             armour_factor: 1,
         },
-        placement: None,
         goal_location: (X / 2, Y / 2),
         log: ["".to_string(), "".to_string(), "".to_string(), "".to_string(), "".to_string()],
         cash: 0,

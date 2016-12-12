@@ -98,8 +98,7 @@ impl WorldData {
                 windows.help.mvaddch(menu_index as i32 + 3, 13, '<');
             }
 
-            Menu::Place => {
-                let placement = self.placement.expect("Want to place but nothing to place!");
+            Menu::Place(placement) => {
                 windows.help.mvaddstr(3, 3, "Placing a");
                 windows.help.mvaddstr(4,
                                       3,

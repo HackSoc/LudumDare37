@@ -56,7 +56,7 @@ impl GameState {
         };
 
         match menu {
-            Menu::Place => {
+            Menu::Place(placement) => {
                 match i {
                     KeyDown | Character('s') => {
                         world_data.player_info.location.1 += 1;
@@ -91,17 +91,16 @@ impl GameState {
                         }
                         world_data.statics[world_data.player_info.location.1][world_data.player_info
                             .location
-                            .0] = world_data.placement;
-                        match world_data.placement {
-                            Some(Turret { .. }) => {
+                            .0] = Some(placement);
+                        match placement {
+                            Turret { .. } => {
                                 world_data.turrets.insert(world_data.player_info.location)
                             }
-                            Some(Obstacle { .. }) => {
+                            Obstacle { .. } => {
                                 world_data.obstacles.insert(world_data.player_info.location)
                             }
-                            _ => panic!("Lost placement???"),
+                            _ => panic!("Placing the unplaceable?"),
                         };
-                        world_data.placement = None;
                         *self = Construct {
                             menu: Menu::Root,
                             menu_index: 0,
@@ -110,7 +109,7 @@ impl GameState {
                     _ => {}
                 }
             }
-            Menu::Move2 => {}
+            Menu::Move2(_) => {}
             _ => {
                 match i {
                     KeyDown | Character('s') => {
@@ -160,31 +159,28 @@ impl GameState {
                             }
                             (Menu::Build, 0) => {
                                 *self = Construct {
-                                    menu: Menu::Place,
+                                    menu: Menu::Place(Turret {
+                                        info: TurretInfo {
+                                            form: (),
+                                            cooldown: 0,
+                                            max_cooldown: 3,
+                                            range: 50,
+                                            health: 100,
+                                            max_health: 100,
+                                            arrow_speed: 2,
+                                            damage_factor: 300,
+                                        },
+                                    }),
                                     menu_index: 0,
-                                };
-                                world_data.placement = Some(Turret {
-                                    info: TurretInfo {
-                                        form: (),
-                                        cooldown: 0,
-                                        max_cooldown: 3,
-                                        range: 50,
-                                        health: 100,
-                                        max_health: 100,
-                                        arrow_speed: 2,
-                                        damage_factor: 300,
-                                    },
-                                });
-                            }
+                                }
                             (Menu::Build, 1) => {
                                 *self = Construct {
-                                    menu: Menu::Place,
+                                    menu: Menu::Place(Obstacle {
+                                        health: 300,
+                                        max_health: 300,
+                                    }),
                                     menu_index: 0,
                                 };
-                                world_data.placement = Some(Obstacle {
-                                    health: 300,
-                                    max_health: 300,
-                                });
                             }
                             (Menu::Build, 2) => {
                                 *self = Construct {
@@ -339,8 +335,8 @@ impl WorldData {
             Menu::Move => 1 + self.turrets.len() + self.obstacles.len(),
             Menu::Upgrade => 1 + self.turrets.len(),
             Menu::Continue => 0,
-            Menu::Place => 0,
-            Menu::Move2 => 0,
+            Menu::Place(_) => 0,
+            Menu::Move2(_) => 0,
         }
     }
 
