@@ -285,7 +285,7 @@ impl GameState {
         } else {
             match world_data.statics[world_data.goal_location.1][world_data.goal_location.0] {
                 Some(Goal { health, .. }) if health == 0 => {
-                    *self = GameOver { msg: "The Yendow is destroyed!".to_string() }
+                    *self = GameOver { msg: "The Thing is destroyed!".to_string() }
                 }
                 _ => {}
             }

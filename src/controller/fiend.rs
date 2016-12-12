@@ -51,7 +51,7 @@ impl WorldData {
                     health: new_health,
                     max_health: max_health,
                 });
-                self.fiend_hit("the Yendow", fiend_info, new_health, max_health);
+                self.fiend_hit("the Thing", fiend_info, new_health, max_health);
                 return;
             }
             Some(Turret { mut info }) if info.health > 0 => {
