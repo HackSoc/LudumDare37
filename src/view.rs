@@ -98,7 +98,7 @@ impl WorldData {
                 windows.help.mvaddch(menu_index as i32 + 3, 13, '<');
             }
 
-            Menu::Place(placement) => {
+            Menu::Place(placement, location) => {
                 windows.help.mvaddstr(3, 3, "Placing a");
                 windows.help.mvaddstr(4,
                                       3,
@@ -107,8 +107,8 @@ impl WorldData {
                                           Obstacle { .. } => "Obstacle",
                                           _ => "Error",
                                       });
-                windows.view.mvaddch(self.player_info.location.1 as i32,
-                                     self.player_info.location.0 as i32,
+                windows.view.mvaddch(location.1 as i32,
+                                     location.0 as i32,
                                      self.render_static(1, placement));
 
             }
