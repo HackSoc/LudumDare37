@@ -134,7 +134,7 @@ impl WorldData {
                                        Some(Goal { health: h, .. }) => h,
                                        _ => 0,
                                    },
-                                   1);
+                                   self.wave);
         let stat_string2 = format!("Cash: {:5}", self.cash);
 
         let offset = (X - stat_string1.len()) as i32 / 2;
