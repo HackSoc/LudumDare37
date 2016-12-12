@@ -122,10 +122,7 @@ fn play() {
     let mut world_data = initial_world();
     let game_windows = view::setup_render(&window);
     let _ = window.keypad(true);
-    let mut gamestate = model::Construct {
-        menu: Menu::Root,
-        menu_index: 0,
-    };
+    let mut gamestate = model::Startup;
     while gamestate != model::End {
         world_data.render(&game_windows, &gamestate);
         if let Some(i) = window.getch() {

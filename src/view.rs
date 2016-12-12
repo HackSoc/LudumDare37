@@ -60,6 +60,7 @@ pub fn setup_render(window: &Window) -> GameWindows {
 impl WorldData {
     pub fn render(&self, windows: &GameWindows, game_state: &GameState) {
         match *game_state {
+            Startup => self.render_startup(windows),
             Construct { menu, menu_index } => {
                 self.render_construct(windows, menu, menu_index)
             }
@@ -69,6 +70,29 @@ impl WorldData {
         };
     }
 
+    fn render_startup(&self, windows: &GameWindows) {
+        let message =
+            "              You are in a room.\n\
+             \n\
+             The Thing is also in the room. It is holy to you.\n\
+             Foul fiends endevour even as we speak to destroy\n\
+             the Thing. You must protect it with all your might!\n\
+             \n\
+             You can defend the Thing by building turrets and\n\
+             obstacles, and by thrusting yourself into the path\n\
+             of your many, many formidable foes.\n\
+             \n\
+             Use WASD or Arrow keys to move, and space or return\n\
+             to select items in menus. Your forsworn fight begins!";
+        let max_line_length = message.lines().max_by_key(|line| line.len()).unwrap().len();
+        let lines_count = message.lines().count();
+        for line in message.lines().enumerate() {
+            let (row, line) = line;
+            windows.view.mvaddstr((row + (Y-lines_count)/2) as i32, ((X-max_line_length)/2) as i32, line);
+        }
+        windows.refresh();
+    }
+    
     pub fn render_construct(&self, windows: &GameWindows, menu: Menu, menu_index: usize) {
         windows.help.erase();
         windows.help.draw_box(0, 0);
