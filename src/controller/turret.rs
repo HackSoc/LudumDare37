@@ -31,7 +31,7 @@ impl WorldData {
                                 .trunc() as usize,
                             incx: incx,
                             incy: incy,
-                            damage_factor: 300,
+                            damage_factor: turret_info.damage_factor,
                         },
                     };
                     self.arrows.insert((x, y));

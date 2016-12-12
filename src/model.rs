@@ -23,6 +23,7 @@ pub struct TurretInfo {
     pub health: usize,
     pub max_health: usize,
     pub arrow_speed: usize,
+    pub damage_factor: usize,
 }
 
 pub use self::Mobile::*;

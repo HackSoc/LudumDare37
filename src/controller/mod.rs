@@ -147,6 +147,7 @@ impl GameState {
                                         health: 100,
                                         max_health: 100,
                                         arrow_speed: 2,
+                                        damage_factor: 300,
                                     },
                                 });
                             }
