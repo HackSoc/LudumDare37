@@ -96,8 +96,7 @@ impl WorldData {
 
         for row_n in 0..Y {
             for col_n in 0..X {
-                let ch = self.statics[row_n][col_n]
-                    .map_or(EMPTY_CELL, |s| self.render_static(row_n, s));
+                let ch = self.statics[row_n][col_n].map_or(EMPTY_CELL, |s| s.render(row_n));
                 windows.view.mvaddch(row_n as i32, col_n as i32, ch);
             }
         }
@@ -153,8 +152,7 @@ impl WorldData {
                         let placement = self.statics[s.1][s.0].unwrap();
                         windows.view.mvaddch(s.1 as i32,
                                              s.0 as i32,
-                                             self.render_static(1, placement) |
-                                             COLOR_PAIR(PLACEMENT_COLORS));
+                                             placement.render(1) | COLOR_PAIR(PLACEMENT_COLORS));
                     }
                 }
                 if nturrets <= depth {
@@ -168,7 +166,7 @@ impl WorldData {
                             let placement = self.statics[s.1][s.0].unwrap();
                             windows.view.mvaddch(s.1 as i32,
                                                  s.0 as i32,
-                                                 self.render_static(1, placement) |
+                                                 placement.render(1) |
                                                  COLOR_PAIR(PLACEMENT_COLORS));
                         }
 
@@ -186,7 +184,7 @@ impl WorldData {
                             let placement = self.statics[s.1][s.0].unwrap();
                             windows.view.mvaddch(s.1 as i32,
                                                  s.0 as i32,
-                                                 self.render_static(1, placement) |
+                                                 placement.render(1) |
                                                  COLOR_PAIR(PLACEMENT_COLORS));
                         }
 
@@ -211,8 +209,7 @@ impl WorldData {
                                       });
                 windows.view.mvaddch(location.1 as i32,
                                      location.0 as i32,
-                                     self.render_static(1, placement) |
-                                     COLOR_PAIR(PLACEMENT_COLORS));
+                                     placement.render(1) | COLOR_PAIR(PLACEMENT_COLORS));
 
             }
         }
@@ -223,7 +220,7 @@ impl WorldData {
             for col_n in 0..X {
                 match self.mobiles[row_n][col_n] {
                     Some(mob) => {
-                        windows.view.mvaddch(row_n as i32, col_n as i32, self.render_mobile(mob));
+                        windows.view.mvaddch(row_n as i32, col_n as i32, mob.render());
                     }
                     None => {}
                 }
@@ -244,9 +241,11 @@ impl WorldData {
 
         gameover.refresh();
     }
+}
 
-    pub fn render_mobile(&self, mob: Mobile) -> chtype {
-        match mob {
+impl Mobile {
+    pub fn render(&self) -> chtype {
+        match *self {
             Player => '@'.to_chtype(),
             Fiend { info } => info.ch,
             Arrow { info: ArrowInfo { dx, dy, incx, incy, .. } } => {
@@ -263,9 +262,11 @@ impl WorldData {
             }
         }
     }
+}
 
-    pub fn render_static(&self, row_n: usize, stat: Static) -> chtype {
-        let chty = match stat {
+impl Static {
+    pub fn render(&self, row_n: usize) -> chtype {
+        let chty = match *self {
                 Wall => '#',
                 Gate => {
                     if row_n == 0 || row_n == Y - 1 {
@@ -281,7 +282,7 @@ impl WorldData {
             .to_chtype();
 
         // Apply formatting
-        match stat {
+        match *self {
             Goal { .. } => chty | COLOR_PAIR(GOAL_COLORS),
             Turret { info } => {
                 let colour = if info.health == 0 {
