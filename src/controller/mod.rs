@@ -174,6 +174,7 @@ impl GameState {
                                                       (X / 2, Y / 2)),
                                     menu_index: 0,
                                 }
+                            }
                             (Menu::Build, 1) => {
                                 *self = Construct {
                                     menu: Menu::Place(Obstacle {
