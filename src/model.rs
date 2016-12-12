@@ -89,12 +89,21 @@ pub struct FiendInfo {
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct ArrowInfo {
+    // Vector (absolute)
     pub dx: usize,
     pub dy: usize,
-    pub incx: bool,
-    pub incy: bool,
-    pub err: i32,
+    // Vector direction
+    pub incx: i8, // [-1,1]
+    pub incy: i8, // [-1,1]
+    // Movement speed
     pub speed: usize,
+    // Bresenham
+    pub err: i32,
+    pub err_inc: i32,
+    pub err_dec: i32,
+    pub corrx: i8, // [-1,1]
+    pub corry: i8, // [-1,1]
+    // Fiend damage
     pub damage_factor: usize,
 }
 

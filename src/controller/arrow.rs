@@ -30,53 +30,18 @@ impl WorldData {
                 }
             };
 
-            let dx = info.dx;
-            let dy = info.dy;
-            let incx = info.incx;
-            let incy = info.incy;
-            let speed = info.speed;
-
-            if dx == 0 {
-                for _ in 0..speed {
-                    y = if incy { y + 1 } else { y - 1 };
-                    if !go((x, y)) {
-                        return;
-                    }
+            // Bresenham's line algorithm
+            for _ in 0..info.speed {
+                if info.err >= 0 {
+                    info.err -= info.err_dec;
+                    x = signed_add(x, info.corrx);
+                    y = signed_add(y, info.corry);
                 }
-            } else if dy == 0 {
-                for _ in 0..speed {
-                    x = if incx { x + 1 } else { x - 1 };
-                    if !go((x, y)) {
-                        return;
-                    }
-                }
-            } else {
-                // Bresenham's line algorithm
-                let gdx = dx > dy;
-                let err_inc: i32 = if gdx { dy as i32 * 2 } else { dx as i32 * 2 };
-                let err_dec: i32 = if gdx { dx as i32 * 2 } else { dy as i32 * 2 };
-                let inc: (i8, i8) = if gdx {
-                    if incx { (1, 0) } else { (-1, 0) }
-                } else {
-                    if incy { (0, 1) } else { (0, -1) }
-                };
-                let correction: (i8, i8) = if gdx {
-                    if incy { (0, 1) } else { (0, -1) }
-                } else {
-                    if incx { (1, 0) } else { (-1, 0) }
-                };
-                for _ in 0..speed {
-                    if info.err >= 0 {
-                        info.err -= err_dec;
-                        x = signed_add(x, correction.0);
-                        y = signed_add(y, correction.1);
-                    }
-                    info.err += err_inc;
-                    x = signed_add(x, inc.0);
-                    y = signed_add(y, inc.1);
-                    if !go((x, y)) {
-                        return;
-                    }
+                info.err += info.err_inc;
+                x = signed_add(x, info.incx);
+                y = signed_add(y, info.incy);
+                if !go((x, y)) {
+                    return;
                 }
             }
         }
