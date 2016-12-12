@@ -254,12 +254,6 @@ impl GameState {
                                 }
                             }
                             (Menu::Root, 2) => {
-                                *self = Construct {
-                                    menu: Menu::Upgrade,
-                                    menu_index: 0,
-                                }
-                            }
-                            (Menu::Root, 3) => {
                                 world_data.wave += 1;
                                 *self = Fight { to_spawn: make_wave(world_data.wave) };
                             }
@@ -439,10 +433,9 @@ impl GameState {
 impl WorldData {
     fn current_menu_length(&self, menu: &Menu) -> usize {
         match *menu {
-            Menu::Root => 4,
+            Menu::Root => 3,
             Menu::Build => 3,
             Menu::Move(_) => 1 + self.turrets.len() + self.obstacles.len(),
-            Menu::Upgrade => 1 + self.turrets.len(),
             Menu::Place(_, _) => 0,
         }
     }

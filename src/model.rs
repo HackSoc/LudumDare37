@@ -112,7 +112,6 @@ pub enum Menu {
     Root,
     Build,
     Move(usize),
-    Upgrade,
     Place(Static, (usize, usize)),
 }
 

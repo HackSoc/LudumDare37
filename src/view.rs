@@ -85,8 +85,7 @@ impl WorldData {
             Menu::Root => {
                 windows.help.mvaddstr(3, 3, "Build");
                 windows.help.mvaddstr(4, 3, "Move");
-                windows.help.mvaddstr(5, 3, "Upgrade");
-                windows.help.mvaddstr(6, 3, "Continue");
+                windows.help.mvaddstr(5, 3, "Continue");
                 windows.help.mvaddch(menu_index as i32 + 3, 2, '>');
                 windows.help.mvaddch(menu_index as i32 + 3, 13, '<');
             }
@@ -175,7 +174,6 @@ impl WorldData {
                                      COLOR_PAIR(PLACEMENT_COLORS));
 
             }
-            _ => unimplemented!(),
         }
         windows.refresh();
     }
