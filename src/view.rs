@@ -60,7 +60,7 @@ pub fn setup_render(window: &Window) -> GameWindows {
 impl WorldData {
     pub fn render(&self, windows: &GameWindows, game_state: &GameState) {
         match *game_state {
-            Construct { menu: menu, menu_index: menu_index } => {
+            Construct { menu, menu_index } => {
                 self.render_construct(windows, menu, menu_index)
             }
             Fight { .. } => self.render_fight(windows),
