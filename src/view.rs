@@ -59,44 +59,41 @@ pub fn setup_render(window: &Window) -> GameWindows {
 
 impl WorldData {
     pub fn render(&self, windows: &GameWindows, game_state: &GameState) {
+        self.render_frame(windows);
         match *game_state {
             Startup => self.render_startup(windows),
-            Construct { menu, menu_index } => {
-                self.render_construct(windows, menu, menu_index)
-            }
+            Construct { menu, menu_index } => self.render_construct(windows, menu, menu_index),
             Fight { .. } => self.render_fight(windows),
             GameOver { ref msg } => self.render_gameover(windows, msg),
             _ => unimplemented!(),
         };
-    }
-
-    fn render_startup(&self, windows: &GameWindows) {
-        let message =
-            "              You are in a room.\n\
-             \n\
-             The Thing is also in the room. It is holy to you.\n\
-             Foul fiends endevour even as we speak to destroy\n\
-             the Thing. You must protect it with all your might!\n\
-             \n\
-             You can defend the Thing by building turrets and\n\
-             obstacles, and by thrusting yourself into the path\n\
-             of your many, many formidable foes.\n\
-             \n\
-             Use WASD or Arrow keys to move, and space or return\n\
-             to select items in menus. Your forsworn fight begins!";
-        let max_line_length = message.lines().max_by_key(|line| line.len()).unwrap().len();
-        let lines_count = message.lines().count();
-        for line in message.lines().enumerate() {
-            let (row, line) = line;
-            windows.view.mvaddstr((row + (Y-lines_count)/2) as i32, ((X-max_line_length)/2) as i32, line);
-        }
         windows.refresh();
     }
-    
-    pub fn render_construct(&self, windows: &GameWindows, menu: Menu, menu_index: usize) {
+
+    pub fn render_frame(&self, windows: &GameWindows) {
         windows.help.erase();
         windows.help.draw_box(0, 0);
         windows.help.mvaddstr(1, 1, "THING PROTECTOR");
+
+        let stat_string1 = format!("Health: {:3} | Thing Integrity: {:3} | Wave: {:3}",
+                                   self.player_info.health,
+                                   match self.statics[Y / 2][X / 2] {
+                                       Some(Goal { health: h, .. }) => h,
+                                       _ => 0,
+                                   },
+                                   self.wave);
+        let stat_string2 = format!("Cash: {:5}", self.cash);
+
+        let offset = (X - stat_string1.len()) as i32 / 2;
+        windows.stats.mvaddstr(2, offset, stat_string1.as_str());
+        windows.stats.mvaddstr(3, offset, stat_string2.as_str());
+
+        windows.log.clear();
+        windows.log.draw_box(0, 0);
+        for i in 0..self.log.len() {
+            windows.log.mvaddstr(i as i32 + 1, 1, self.log[i].as_str());
+        }
+
         for row_n in 0..Y {
             for col_n in 0..X {
                 let ch = self.statics[row_n][col_n]
@@ -104,7 +101,27 @@ impl WorldData {
                 windows.view.mvaddch(row_n as i32, col_n as i32, ch);
             }
         }
+    }
 
+    fn render_startup(&self, windows: &GameWindows) {
+        let message = "              You are in a room.\n\nThe Thing is also in the room. It is \
+                       holy to you.\nFoul fiends endevour even as we speak to destroy\nthe Thing. \
+                       You must protect it with all your might!\n\nYou can defend the Thing by \
+                       building turrets and\nobstacles, and by thrusting yourself into the \
+                       path\nof your many, many formidable foes.\n\nUse WASD or Arrow keys to \
+                       move, and space or return\nto select items in menus. Your forsworn fight \
+                       begins!";
+        let max_line_length = message.lines().max_by_key(|line| line.len()).unwrap().len();
+        let lines_count = message.lines().count();
+        for line in message.lines().enumerate() {
+            let (row, line) = line;
+            windows.view.mvaddstr((row + (Y - lines_count) / 2) as i32,
+                                  ((X - max_line_length) / 2) as i32,
+                                  line);
+        }
+    }
+
+    pub fn render_construct(&self, windows: &GameWindows, menu: Menu, menu_index: usize) {
         match menu {
             Menu::Root => {
                 windows.help.mvaddstr(3, 3, "Build");
@@ -199,49 +216,19 @@ impl WorldData {
 
             }
         }
-        windows.refresh();
     }
 
     pub fn render_fight(&self, windows: &GameWindows) {
         for row_n in 0..Y {
             for col_n in 0..X {
-                let ch = self.mobiles[row_n][col_n].map_or(self.statics[row_n][col_n]
-                                                               .map_or(EMPTY_CELL, |s| {
-                                                                   self.render_static(row_n, s)
-                                                               }),
-                                                           |m| self.render_mobile(m));
-                windows.view.mvaddch(row_n as i32, col_n as i32, ch);
+                match self.mobiles[row_n][col_n] {
+                    Some(mob) => {
+                        windows.view.mvaddch(row_n as i32, col_n as i32, self.render_mobile(mob));
+                    }
+                    None => {}
+                }
             }
         }
-        let stat_string1 = format!("Health: {:3} | Thing Integrity: {:3} | Wave: {:3}",
-                                   self.player_info.health,
-                                   match self.statics[Y / 2][X / 2] {
-                                       Some(Goal { health: h, .. }) => h,
-                                       _ => 0,
-                                   },
-                                   self.wave);
-        let stat_string2 = format!("Cash: {:5}", self.cash);
-
-        let offset = (X - stat_string1.len()) as i32 / 2;
-        windows.stats.mvaddstr(2, offset, stat_string1.as_str());
-        windows.stats.mvaddstr(3, offset, stat_string2.as_str());
-        windows.stats.refresh();
-
-        windows.view.refresh();
-
-        windows.help.mvaddstr(1, 1, "THING PROTECTOR");
-        windows.help.refresh();
-
-        windows.log.clear();
-        windows.log.draw_box(0, 0);
-        for i in 0..self.log.len() {
-            windows.log.mvaddstr(i as i32 + 1, 1, self.log[i].as_str());
-        }
-
-        windows.stats.refresh();
-        windows.view.refresh();
-        windows.help.refresh();
-        windows.log.refresh();
     }
 
     pub fn render_gameover(&self, windows: &GameWindows, msg: &String) {
@@ -256,7 +243,6 @@ impl WorldData {
         gameover.attroff(A_BOLD | COLOR_PAIR(GAMEOVER_COLORS));
 
         gameover.refresh();
-        windows.view.refresh();
     }
 
     pub fn render_mobile(&self, mob: Mobile) -> chtype {
