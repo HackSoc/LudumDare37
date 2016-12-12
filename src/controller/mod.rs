@@ -290,6 +290,11 @@ impl GameState {
                 _ => {}
             }
         }
+
+        // Check for phase end
+        if world_data.fiends.is_empty() {
+            *self = Construct;
+        }
     }
 }
 
