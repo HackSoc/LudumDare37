@@ -109,7 +109,8 @@ impl WorldData {
                                       });
                 windows.view.mvaddch(location.1 as i32,
                                      location.0 as i32,
-                                     self.render_static(1, placement));
+                                     self.render_static(1, placement) |
+                                     COLOR_PAIR(PLACEMENT_COLORS));
 
             }
             _ => unimplemented!(),
